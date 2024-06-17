@@ -1,0 +1,379 @@
+package com.ace.app.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.ace.app.dto.CreateExamDTO;
+import com.ace.app.dto.ModifyOExamDTO;
+import com.ace.app.dto.ModifySExamDTO;
+import com.ace.app.dto.QueryDTO;
+import com.ace.app.entity.Exam;
+import com.ace.app.model.ExamState;
+import com.ace.app.service.ExamService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+/**
+ * Controller for the dashboard on the server machine
+ * @author Ogboru Jude
+ * @version 17-June-2024
+ */
+@Controller
+public class DashboardController {
+
+	@Autowired
+	private ExamService examService;
+
+	/**
+	 * Checks if the request is from either {@code localhost} or {@code 127.0.0.1}
+	 * @param request The request to check the url
+	 * @return {@code true} if the request contains {@code localhost} or {@code 128.0.0.1}
+	 */
+	public static boolean isLocalhost( HttpServletRequest request ) {
+		String url = request.getRequestURL().toString();
+		return url.contains( "localhost" ) || url.contains( "127.0.0.1" );
+	}
+
+	/**
+	 * Redirects to the proper route based on the request
+	 * @param request Used to determine if request comes from the server
+	 * @return Redirect to the proper route
+	 */
+	@GetMapping( "/" )
+	public String indexRouter( HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Routing for the {@code /scheduled} get mapping
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The template for the scheduled exams
+	 */
+	@GetMapping( "/scheduled" )
+	public String scheduled( Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examService.sortExams();
+			List<Exam> exams = examService.getExamsByState( ExamState.Scheduled );
+			model.addAttribute( "exams", exams );
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			model.addAttribute( "countScheduled", exams.size() );
+			model.addAttribute( "countRecorded", examService.countExamsByState( ExamState.Recorded ) );
+			return "dashboard/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Routing for the {@code /recorded} get mapping
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The template for the recorded exams
+	 */
+	@GetMapping( "/recorded" )
+	public String recorded( Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			List<Exam> exams = examService.getExamsByState( ExamState.Recorded );
+			model.addAttribute( "exams", exams );
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			model.addAttribute( "countScheduled", examService.countExamsByState( ExamState.Scheduled ) );
+			model.addAttribute( "countRecorded", exams.size() );
+			return "dashboard/recorded";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Routing for the {@code /ongoing} get mapping
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The template for the ongoing exams if there are ongoing exams else redirects to the recorded exams page
+	 */
+	@GetMapping( "/ongoing" )
+	public String ongoing( Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examService.sortExams();
+			List<Exam> exams = examService.getExamsByState( ExamState.Ongoing );
+			if ( exams.isEmpty() ) {
+				return "redirect:/recorded";
+			}
+			model.addAttribute( "exams", exams );
+			return "dashboard/ongoing";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Gets a list of exams by their title 
+	 * @param title The title to search for
+	 * @param model  Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return A template containing results from the search
+	 */
+	@PostMapping( "/search" )
+	public String search( String title, Model model, HttpServletRequest request ) {
+		// TODO implement
+		if ( isLocalhost( request ) ) {
+			if ( title == null || title.isBlank() ) {
+				return "redirect:/advanced-search";
+			}
+			List<Exam> exams = examService.getExamsByTitleLike( title );
+			model.addAttribute( "exams", exams );
+			return "dashboard/search";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO
+	 * Get mapping for the advanced search template
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The template for advanced searches
+	 */
+	@GetMapping( "/advanced-search" )
+	public String search( Model model, HttpServletRequest request ) {
+		// TODO implement
+		if ( isLocalhost( request ) ) {
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			model.addAttribute( "searchQuery", new QueryDTO() );
+			return "dashboard/advanced-search/search";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO
+	 * @param searchQuery The search configuration object
+	 * @param model  Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return A template containing results from the search
+	 */
+	@PostMapping( "/advanced-search" )
+	public String search( QueryDTO query, Model model, HttpServletRequest request ) {
+		// TODO implement
+		if ( isLocalhost( request ) ) {
+			return "dashboard/advanced-search/search-result";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * The get mapping for the {@code /create} route.
+	 * Sets up the template by adding the appropriate data transfer object to
+	 * the model.
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The create exam template
+	 */
+	@GetMapping( "/create" )
+	public String create( Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			if ( model.getAttribute( "exam" ) == null ) {
+				model.addAttribute( "exam", new CreateExamDTO() );
+			}
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			return "dashboard/create";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Extracts the exam papers from the document
+	 * @param examDTO The exam to be created containing all information
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @param redirect Provided by Springboot to pass arguments to the redirected route
+	 * @return A template containing the the exam to be created as is
+	 */
+	@PostMapping( "/create/review" )
+	public String reviewExam( CreateExamDTO examDTO, Model model, HttpServletRequest request, RedirectAttributes redirect ) {
+		if ( isLocalhost( request ) ) {
+			if ( !examDTO.parsePaperDocument() ) {
+				redirect.addFlashAttribute( "exam", examDTO );
+				return "redirect:/create";
+			}
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			model.addAttribute( "exam", examDTO );
+			return "dashboard/review-create";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO describe
+	 * @param examDTO The exam to be created containing all information
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return A template similar to {@link #reviewExam(CreateExamDTO, Model, HttpServletRequest, RedirectAttributes)}
+	 * but with the candidates extracted if any
+	 */
+	@PostMapping( "/create/review/candidates" ) 
+	public String reviewCandidate( CreateExamDTO examDTO, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examDTO.parseCandidateLoginInfoDocument();
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			model.addAttribute( "exam", examDTO );
+			return "dashboard/review-create";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Creates an exam from the {@code examDTO} if possible on the database
+	 * @param examDTO Data containing the details with the exam to be created
+	 * @param request Used to determine if request comes from the server
+	 * @return A redirect to the scheduled page
+	 */
+	@PostMapping( "/create" )
+	public String createExam( CreateExamDTO examDTO, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examService.createExam( examDTO );
+			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Get mapping for the template for modifying an exam
+	 * @param examId An integer that is the ID of the exam to be modified 
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The appropriate template for an exam based on the exams state
+	 */
+	@GetMapping( "/modify/{examId}" )
+	public String modify( @PathVariable( "examId" ) Long examId, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null ) {
+				return "redirect:/scheduled";
+			}
+			switch ( exam.getState() ) {
+				case Scheduled -> {
+					ModifySExamDTO examDTO = new ModifySExamDTO( exam );
+					model.addAttribute( "exam", examDTO );
+					return "dashboard/modify-scheduled";
+				}
+				case Ongoing -> {
+					ModifyOExamDTO examDTO = new ModifyOExamDTO( exam );
+					model.addAttribute( "exam", examDTO );
+					return "dashboard/modify-ongoing";
+				}
+				case Recorded -> {
+					return "redirect:/export/" + examId.toString();
+				}
+			}
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Post mapping for confirming the changes to be made to the exam
+	 * @param examDTO The exam to be modified containing all information
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return The template containing the changes made to the exam as is
+	 */
+	@PostMapping( "/modify/scheduled/review" )
+	public String modifyScheduled( ModifySExamDTO examDTO, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
+			if ( exam != null && exam.getState() == ExamState.Scheduled ) {
+				model.addAttribute( "showPapers", examDTO.parsePaperDocument() );
+				model.addAttribute( "showCandidates", examDTO.parseCandidateLoginInfoDocument() );
+				model.addAttribute( "exam", examDTO );
+				return "dashboard/review-modify-scheduled";
+			}
+			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO
+	 * @param examDTO
+	 * @param request
+	 * @return
+	 */
+	@PostMapping( "/modify/scheduled" )
+	public String modifyScheduled( ModifySExamDTO examDTO, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
+			if ( exam != null && exam.getState() == ExamState.Scheduled ) {
+				examService.update( examDTO );
+			}
+			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO
+	 * @param examId
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if request comes from the server
+	 * @return
+	 */
+	@GetMapping( "/export/{examId}")
+	public String export( @PathVariable( "examId") Long examId, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Recorded ) {
+				return "redirect:/scheduled";
+			}
+			model.addAttribute( "exam", exam );
+			return "dashboard/export";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Deletes the exam based on the {@code examId}
+	 * @param examId The id of the exam to be deleted
+	 * @param request Used to determine if request comes from the server
+	 * @return A redirect back to either the recorded page if the previous page was the recorded page or else the scheduled page
+	 */
+	@GetMapping( "/delete/{examId}" )
+	public String deleteExam( @PathVariable( "examId" ) Long examId, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examService.deleteExamById( examId );
+			String referer = request.getHeader( "referer" );
+			if ( referer.contains( "recorded" ) ) {
+				return "redirect:/recorded";
+			}
+			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Stops the exam if the exam is meant to be or is currently ongoing. Could potentially update the
+	 * end time.
+	 * @param examId The id of the exam to be stopped
+	 * @param request Used to determine if request comes from the server
+	 * @return A redirect to /recorded if the exam is recorded
+	 * @see ExamService
+	 */
+	@GetMapping( "/stop/{examId}" )
+	public String stopExam( @PathVariable( "examId" ) Long examId, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			examService.stopExamById( examId );
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Recorded ) {
+				return "redirect:/scheduled";
+			}
+			return "redirect:/recorded";
+		}
+		return "redirect:/exam";
+	}
+}

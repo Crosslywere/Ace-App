@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+		h2 {
+			font-size: 38px;
+			font-weight: 500;
+		}
+		p {
+			margin-bottom: 48px;
+		}
+		label {
+			font-size: 18px;
+			line-height: 28px;
+		}
+		input {
+			padding: 18px 32px;
+			font-weight: 300;
+		}
+		select {
+			padding: 18px 32px;
+			margin-top: 8px;
+			margin-bottom: 48px;
+		}
+		button {
+			margin-top: 48px;
+			border: none;
+			font-weight: 600;
+			padding: 22px;
+		}
+	</style>
+	<title>Login</title>
+</head>
+<body>
+	<div class="border-bottom" style="padding:36px 72px 24px;">
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+	</div>
+	<form th:action="@{/exam}" th:object="${candidate}" method="post" class="container">
+		<div>
+			<input type="number" th:field="*{examId}" hidden>
+			<th:block th:each="paperName : *{paperNames}">
+				<input type="text" th:field="*{paperNames}" th:value="${paperName}" hidden>
+			</th:block>
+		</div>
+		<h2 class="text-center">Login</h2>
+		<p class="text-center">Enter the required credentials.</p>
+		<label>
+			<span th:text="${field1}"></span>
+			<th:block th:switch="${field1}">
+				<th:block th:case="${T(com.ace.app.model.CandidateInfo).Email.representation}">
+					<input type="email" th:field="*{field1}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+				</th:block>
+				<th:block th:case="${T(com.ace.app.model.CandidateInfo).RegistrationNumber.representation}">
+					<input type="number" th:field="*{field1}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+				</th:block>
+				<th:block th:case="${T(com.ace.app.model.CandidateInfo).PhoneNumber.representation}">
+					<input type="tel" th:field="*{field1}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+				</th:block>
+				<th:block th:case="*">
+					<input type="text" th:field="*{field1}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+				</th:block>
+			</th:block>
+		</label>
+		<th:block th:unless="${#strings.isEmpty(field2)}">
+			<label>
+				<span th:text="${field2}"></span>
+				<th:block th:switch="${field2}">
+					<th:block th:case="${T(com.ace.app.model.CandidateInfo).Email.representation}">
+						<input type="email" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+					</th:block>
+					<th:block th:case="${T(com.ace.app.model.CandidateInfo).RegistrationNumber.representation}">
+						<input type="number" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+					</th:block>
+					<th:block th:case="${T(com.ace.app.model.CandidateInfo).PhoneNumber.representation}">
+						<input type="tel" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+					</th:block>
+					<th:block th:case="*">
+						<input type="text" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+					</th:block>
+				</th:block>
+			</label>
+		</th:block>
+		<button type="submit" class="action-btn width-100 br-16">Login</button>
+	</form>
+</body>
+</html>

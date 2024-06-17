@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+	</style>
+	<title>Start Exam</title>
+</head>
+<body>
+	<div class="border-bottom flex-row align-center" style="padding:36px 72px 24px;">
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+	</div>
+	<div class="container">
+		<form th:action="@{/exam/{paperName}/{questionNumber}(paperName=${candidate.paperName}, questionNumber=${candidate.questionNumber})}" th:object="${candidate}" method="post">
+			<button class="action-btn width-100 br-16" type="submit">Start</button>
+		</form>
+	</div>
+</body>
+</html>

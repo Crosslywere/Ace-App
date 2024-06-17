@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Advanced Search Result</title>
+	<style>
+		
+	</style>
+</head>
+<body>
+	<div class="flex-row" style="height:fit-content">
+		<div class="menu flex-col align-center white-bg">
+			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+			<details open>
+				<summary class="flex-row justify-between align-center br-16" style="width:271px;background-color:#0F29420A;padding:12px 16px;"><span class="flex align-center"><img th:src="@{/images/dashboard-icon.svg}" alt="dashboard-icon" class="mr-8">Dashboard</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+				<ul style="list-style:none;margin:15px 0 0 25px;padding-left:23px;" class="border-left">
+					<li><a th:href="@{/scheduled}">Currently Scheduled Exam</a></li>
+					<li><a th:href="@{/recorded}">Exam Record</a></li>
+					<li th:if="${countOngoing > 0}"><a th:href="@{/ongoing}">Ongoing Exams</a></li>
+					<li><a th:href="@{/create}">Create New Exam</a></li>
+					<li><a th:href="@{/advanced-search}" class="blue-text">Advanced Search</a></li>
+				</ul>
+			</details>
+		</div>
+		<div class="flex-col align-center width-minus-menu">
+			<div class="fit-height white-bg width-100 border-bottom">
+				<div class="container flex-row justify-between align-center" style="margin:19px auto;">
+					<form th:action="@{/search}" method="post" style="position:relative">
+						<input type="text" name="search" placeholder="Search Exams By Title" class="border br-16">
+						<button type="submit" class="none-btn" style="position:absolute;top:10px;right:14px;cursor:pointer;"><img th:src="@{/images/search.svg}" alt="Search"></button>
+					</form>
+					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
+				</div>
+			</div>
+			<div class="container white-bg br-16 border flex-col fit-height" style="margin-top:40px">
+				<!--  -->
+			</div>
+		</div>
+	</div>
+</body>
+</html>

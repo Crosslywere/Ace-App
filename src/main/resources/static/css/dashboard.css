@@ -1,0 +1,128 @@
+@import '../fonts/Plus Jakarta Sans.css';
+
+a[aria-current="true"] {
+	border-bottom: 5px solid #3498DB;
+}
+a[aria-current="false"] {
+	font-weight: 500;
+	color: #BDBDBD;
+}
+li:first-child {
+	padding-top: 9px;
+}
+li:last-child {
+	padding-bottom: 9px;
+}
+td:first-child {
+	max-width: 200px;
+}
+td {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+td a {
+	padding: 0 16px;
+	font-size: 15px;
+	line-height: 28px;
+	margin: 0 4px;
+	border-radius: .5em;
+}
+.logo {
+	margin: 88px 0 61px;
+}
+big {
+	display: block;
+	margin-top:6px;
+	font-size:32px;
+	font-weight: 700;
+}
+label {
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 28px;
+	color: #7C7C7C;
+}
+input:not([name="search"]):not([type="range"]):not([type="radio"]):not([type="checkbox"]), select, option {
+	font-size: 18px;
+	line-height: 28px;
+	font-weight: 300;
+	padding: 18px 32px;
+	margin: 8px 0 24px 0;
+	width: 100%;
+}
+option {
+	display: block;
+}
+input[type="range"] {
+	width: 100%;
+	margin: 8px 0 24px 0;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 4px;
+	border-radius: 2px;
+	background-color: #BDBDBD;
+}
+input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 16px;
+	height: 16px;
+	border-radius:8px;
+	background-color:#3498DB;
+	cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+	width: 16px;
+	height: 16px;
+	border-radius: 8px;
+	background-color: #3498DB;
+	cursor: pointer;
+}
+input[name="search"] {
+	font-size: 12px;
+	line-height: 14px;
+	font-weight: 300;
+	padding: 13px 50px 13px 24px;
+}
+input[type="file"] ~ label {
+	border: 1px dashed black;
+	color: black;
+	display: block;
+	font-family: 'Plus Jakarta Sans', sans-serif;
+	font-size: 10px;
+	line-height: 24px;
+	padding: 16px 0 13px 0;
+	margin: 8px 0 24px 0;
+	width: 100%;
+}
+input[type="file"] ~ label h3 {
+	font-size: 14px;
+	font-weight: 500;
+	display: inline-block;
+	margin: 0;
+}
+button:not(.none-btn) {
+	width: 210px;
+	font-weight: 600;
+	font-size: 20px;
+	line-height: 62px;
+	border: none;
+}
+button:disabled {
+	opacity: 50%;
+}
+h2 {
+	font-weight: 400;
+	font-size: 20px;
+	LINE-HEIGHT:28PX;
+	margin: 48px 0 40px;
+}
+input[type="file"] ~ label.success-upload {
+	border-color: #1D9C53;
+	color: #1D9C53;
+}
+input[type="file"] ~ label.fail-upload {
+	border-color: #FF1800;
+	color: #FF1800;
+}

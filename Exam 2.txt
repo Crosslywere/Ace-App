@@ -1,0 +1,36 @@
+Math:
+1. Which of these is not a prime number?
+a. 11
+b. 13
+c. 27
+d. 29
+e. 31
+Ans: c
+2. Which of these is not a prime number?
+a. 11
+b. 13
+c. 27
+d. 29
+e. 31
+Ans: c
+3. Which of these is not a prime number?
+a. 11
+b. 13
+c. 27
+d. 29
+e. 31
+Ans: c
+4. Which of these is not a prime number?
+a. 11
+b. 13
+c. 27
+d. 29
+e. 31
+Ans: c
+5. Which of these is not a prime number?
+a. 11
+b. 13
+c. 27
+d. 29
+e. 31
+Ans: c

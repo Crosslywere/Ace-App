@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.com">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		.container {
+			width: 600px;
+			margin: 32px auto 0;
+		}
+		h2 {
+			margin: 88px auto;
+			font-size: 38px;
+			font-weight: 500;
+		}
+		p {
+			font-size: 18px;
+			line-height: 32px;
+		}
+		a.action-btn {
+			padding: 22px;
+			margin-top: 48px;
+			font-weight: 600;
+		}
+	</style>
+	<title>Error</title>
+</head>
+<body>
+	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+	</div>
+	<div class="container">
+		<h2 class="text-center">An Error Occured</h2>
+		<p th:text="|Reason: ${reason}|" class="text-center"></p>
+		<p class="text-center">Please see the invigilator to try to resolve this issue.</p>
+		<a th:href="@{/exam}" class="br-16 text-center action-btn">Back to the main page</a>
+	</div>
+</body>
+</html>

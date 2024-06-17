@@ -1,0 +1,28 @@
+services:
+  app_db:
+    ports:
+      - 5432:5432
+    container_name: postgres-db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: ace_exam_platform
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: replace_password
+    restart: always
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: application
+    ports:
+      # vvvv----- The exposed port
+      - 8080:8081 # <---- The application's port
+    environment:
+      #Enviroment variables to specify how to link to the database
+      db-url: jdbc:postgresql://app_db:5432/ace_exam_platform #Should end with the same as POSTGRES_DB
+      db-username: ace #Should be the same as the POSTGRES_USER
+      db-password: replace_password #Should be the same as the POSTGRES_PASSWORD
+      db-ddl: validate #Should be either create, create-drop, update, validate. Defaults to validate
+    depends_on:
+      - app_db
+    restart: always

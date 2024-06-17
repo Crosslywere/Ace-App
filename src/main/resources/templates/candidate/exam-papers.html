@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		.container {
+			width: 600px;
+			margin: 0 auto;
+		}
+		label > span {
+			font-size: 18px;
+			line-height: 32px;
+		}
+		button, a.action-btn {
+			margin-top: 48px;
+			border: none;
+			font-weight: 600;
+			padding: 22px;
+		}
+	</style>
+	<title>Select Papers</title>
+</head>
+<body>
+	<div class="border-bottom" style="padding:36px 72px 24px;">
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+	</div>
+	<form th:action="@{/exam/login}" th:object="${candidate}" method="post" class="container">
+		<input type="number" th:field="*{examId}" hidden>
+		<h2>Select All Papers</h2>
+		<th:block th:each="paper : ${exam.papers}">
+			<label>
+				<input type="checkbox" th:field="*{paperNames}" th:value="${paper.name}" th:checked="${paper.manditory}"> <span th:text="${paper.name}"></span>
+			</label>
+			<br>
+		</th:block>
+		<button class="action-btn width-100 br-16" type="submit">Next</button>
+	</form>
+</body>
+</html>

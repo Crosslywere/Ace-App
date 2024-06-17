@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<link rel="stylesheet" th:href="@{/css/dashboard.css}">
+	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<style>
+		.container {
+			width: 806px;
+			height: fit-content;
+		}
+		.flex-row > label {
+			flex: 0.5;
+			max-width: 340px;
+		}
+	</style>
+	<title th:text="|Modify ${exam.title}|">Modify Exam</title>
+</head>
+<body class="offwhite-bg">
+	<div class="flex-row" style="height:fit-content">
+		<div class="menu flex-col align-center white-bg">
+			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+			<details open>
+				<summary class="flex-row justify-between align-center br-16" style="width:271px;background-color:#0F29420A;padding:12px 16px;"><span class="flex align-center"><img th:src="@{/images/dashboard-icon.svg}" alt="dashboard-icon" class="mr-8">Dashboard</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+				<ul style="list-style:none;margin:15px 0 0 25px;padding-left:23px;" class="border-left">
+					<li><a th:href="@{/scheduled}">Currently Scheduled Exam</a></li>
+					<li><a th:href="@{/recorded}">Exam Record</a></li>
+					<li th:if="${countOngoing > 0}"><a th:href="@{/ongoing}">Ongoing Exams</a></li>
+					<li><a th:href="@{/create}">Create New Exam</a></li>
+					<li><a th:href="@{/advanced-search}">Advanced Search</a></li>
+				</ul>
+			</details>
+		</div>
+		<div class="flex-col align-center width-minus-menu">
+			<div class="fit-height white-bg width-100 border-bottom">
+				<div class="container flex-row justify-between align-center" style="margin:19px auto;">
+					<form th:action="@{/search}" method="post" style="position:relative">
+						<input type="text" name="search" placeholder="Search Exams By Title" class="border br-16">
+						<button type="submit" class="none-btn" style="position:absolute;top:10px;right:14px;cursor:pointer;"><img th:src="@{/images/search.svg}" alt="Search"></button>
+					</form>
+					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
+				</div>
+			</div>
+			<div class="container white-bg br-16 border" style="padding:0 53px 53px 53px;margin-top:55px;">
+				<h2 th:text="|Modify Exam - ${exam.title}|">Modify Exam</h2>
+				<form th:action="@{/modify/scheduled/review}" th:object="${exam}" method="post" enctype="multipart/form-data">
+					<input type="number" th:field="*{examId}" hidden>
+					<label>
+						TITLE
+						<br>
+						<input type="text" th:field="*{title}" class="border br-16" required>
+					</label>
+					<br>
+					<div class="flex-row justify-between">
+						<label>
+							START TIME
+							<br>
+							<input type="time" th:field="*{startTime}" class="text-center border br-16">
+						</label>
+						<label>
+							END TIME
+							<br>
+							<input type="time" th:field="*{endTime}" class="text-center border br-16">
+						</label>
+						<br>
+					</div>
+					<label>
+						SCHEDULED DATE
+						<br>
+						<input type="date" th:field="*{scheduledDate}" th:min="*{MIN_DATE}" class="text-center border br-16">
+					</label>
+					<br>
+					<label>
+						DURATION
+						<br>
+						<input type="number" th:field="*{duration}" class="text-center border br-16" min="1">
+					</label>
+					<br>
+					<label id="slider">
+						CUTOFF MARK &nbsp;&nbsp;<span id="pass-value"></span>
+						<br>
+						<input type="range" th:field="*{cutOffMark}" min="0" max="1" step="0.05">
+					</label>
+					<label>
+						<input type="checkbox" th:field="*{allowCutOffMark}">
+						SET CUTOFF MARK
+					</label>
+					<br>
+					<label>
+						PAPERS PER CANDIDATE
+						<br>
+						<input type="number" th:field="*{papersPerCandidate}" th:max="*{#lists.size(modifyPapers)}" min="1" class="text-center border br-16">
+					</label>
+					<br>
+					<details>
+						<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px"><span>Advanced</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+						<!-- Papers -->
+						<h2 style="margin: 0 0 1em;" class="text-center" th:text="*{#lists.size(modifyPapers) == 1 ? 'Paper' : 'Papers'}">Paper(s)</h2>
+						<th:block th:each="paper, paperStat : *{modifyPapers}">
+							<details style="margin-bottom:24px">
+								<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px"><span th:text="*{modifyPapers[__${paperStat.index}__].name}"></span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+								<label>
+									NAME OF PAPER
+									<input type="text" th:field="*{modifyPapers[__${paperStat.index}__].name}" class="text-center border br-16" required>
+								</label>
+								<label>
+									QUESTIONS PER CANDIDATE
+									<input type="number" th:field="*{modifyPapers[__${paperStat.index}__].questionsPerCandidate}" th:max="${#lists.size(paper.modifyQuestions)}" th:min="1" class="text-center border br-16">
+								</label>
+								<label>
+									<input type="checkbox" th:field="*{modifyPapers[__${paperStat.index}__].manditory}">
+									MANDATORY
+								</label>
+								<th:block th:each="question, questionStat : *{modifyPapers[__${paperStat.index}__].modifyQuestions}">
+									<input type="number" th:field="*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].number}" hidden>
+									<input type="text" th:field="*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].question}" hidden>
+									<p th:text="|*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].number}. ${question.question}|"></p>
+									<th:block th:each="option, optionStat : *{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].options}">
+										<label th:with="index=${optionStat.index},answer=*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].answerIndex}">
+											<input type="radio" th:field="*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].answerIndex}" th:value="${index}" th:checked="${index == answer}">
+											<span th:text="${option}"></span>
+											<input type="text" th:field="*{modifyPapers[__${paperStat.index}__].modifyQuestions[__${questionStat.index}__].options[__${index}__]}" th:value="${option}" hidden>
+										</label>
+										<br>
+									</th:block>
+								</th:block>
+							</details>
+						</th:block>
+						<label>
+							UPLOAD EXAM QUESTIONS
+							<br>
+							<input type="file" th:field="*{paperDocument}" accept=".txt, .doc, .docx" hidden>
+							<label class="text-center br-16" for="paperDocument">
+									<h3>Upload Exam Questions</h3>
+									<br>
+									Supported Files: .txt, .docx
+									<br>
+									The maximum file size is 512KB
+							</label>
+						</label>
+						<label>
+							<input type="radio" th:field="*{paperTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Ignore}">
+							IGNORE
+						</label>
+						<label>
+							<input type="radio" th:field="*{paperTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Append}">
+							APPEND
+						</label>
+						<label>
+							<input type="radio" th:field="*{paperTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Replace}">
+							REPLACE
+						</label>
+						<br>
+						<!-- Candidates -->
+						<h2 style="margin: 0 0 1em;" class="text-center">Candidates</h2>
+						<div class="flex-row justify-between">
+							<label>
+								FIELD 1
+								<br>
+								<select th:field="*{loginField1}" class="text-center border br-16">
+									<th:block th:each="field : ${T(com.ace.app.model.CandidateField).values()}">
+									<th:block th:unless="${field.name == 'None' || field.name == 'Password'}">
+										<option th:value="${field}" th:text="|${field.name}|"></option>
+									</th:block>
+								</select>
+								<input type="text" th:field="*{loginField1Desc}" class="text-center border br-16" placeholder="Field 1 Descriptor" required>
+							</label>
+							<label>
+								FIELD 2
+								<br>
+								<select th:field="*{loginField2}" class="text-center border br-16">
+									<th:block th:each="field : ${T(com.ace.app.model.CandidateField).values()}">
+										<option th:value="${field}" th:text="|${field.name}|"></option>
+									</th:block>
+								</select>
+								<input type="text" th:field="*{loginField2Desc}" class="text-center border br-16" placeholder="Field 2 Descriptor" required>
+							</label>
+						</div>
+						<div th:if="*{!#lists.isEmpty(modifyCandidates)}" id="candidate-details" style="margin-bottom:24px;">
+							<details>
+								<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px">Candidate List</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+								<table class="width-100">
+									<thead>
+										<tr>
+											<th>Field 1 Values</th>
+											<th>Field 2 Values</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="candidate, candidateStat : *{modifyCandidates}">
+											<td class="text-center">
+												<span th:text="${candidate.field1}"></span>
+												<input type="text" th:field="*{modifyCandidates[__${candidateStat.index}__].field1}" hidden>
+											</td>
+											<td class="text-center">
+												<span th:text="${candidate.field2}"></span>
+												<input type="text" th:field="*{modifyCandidates[__${candidateStat.index}__].field2}" hidden>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</details>
+						</div>
+						<label id="upload-candidates">
+							UPLOAD CANDIDATE LIST
+							<input type="file" th:field="*{candidateLoginInfoDocument}" accept=".csv" hidden>
+							<label class="text-center br-16" for="candidateLoginInfoDocument">
+								<h3>Upload Candidate List</h3>
+								<br>
+								Supported File: .csv
+								<br>
+								The maximum file size is 512KB
+							</label>
+						</label>
+						<label>
+							<input type="radio" th:field="*{candidateTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Ignore}">
+							IGNORE
+						</label>
+						<label>
+							<input type="radio" th:field="*{candidateTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Append}">
+							APPEND
+						</label>
+						<label>
+							<input type="radio" th:field="*{candidateTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Replace}">
+							REPLACE
+						</label>
+						<label>
+							<input type="radio" th:field="*{candidateTodo}" th:value="${T(com.ace.app.model.ModifyTodo).Delete}">
+							DELETE
+						</label>
+					</details>
+					<br>
+					<div class="flex justify-end">
+						<button type="submit" class="action-btn br-16">Review Modifications</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		// CutOff mark modification
+		const slider = document.getElementById('cutOffMark');
+		const sliderVal = document.getElementById('pass-value');
+		sliderVal.innerHTML = (slider.value * 100) + '%';
+		slider.addEventListener('change', () => {
+			sliderVal.innerHTML = (slider.value * 100) + '%';
+		});
+		const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
+		if (allowCutOffMark) {
+			document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			allowCutOffMark.addEventListener("change", () => {
+				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			});
+		}
+		// Perform paper validation
+		const paperInput = document.getElementById("paperDocument");
+		const paperLabel = document.querySelector("#paperDocument ~ label");
+		const validateExam = () => {
+			if (paperInput.files.length == 0) {
+				return;
+			}
+			const maxFileSize = 1024 * 512; // 512KB
+			if (paperInput.files[0].size <= maxFileSize) {
+				paperLabel.classList.add("success-upload");
+				paperLabel.classList.remove("fail-upload");
+				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + '</h3>';
+			} else {
+				paperLabel.classList.add("fail-upload");
+				paperLabel.classList.remove("success-upload");
+				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + ' is too large</h3>';
+			}
+		}
+		paperInput.onchange = validateExam;
+		validateExam();
+
+		// Validate candidates upload list
+		const candidateInput = document.getElementById("candidateLoginInfoDocument");
+		const candidateLabel = document.querySelector("#candidateLoginInfoDocument ~ label");
+		const validateCandidates = () => {
+			if (candidateInput.files.length == 0) {
+				return;
+			}
+			const maxFileSize = 1024 * 512;
+			if (candidateInput.files[0].size <= maxFileSize) {
+				candidateLabel.classList.add("success-upload");
+				candidateLabel.classList.remove("fail-upload");
+				candidateLabel.innerHTML = '<h3>' + candidateInput.files[0].name + '</h3>';
+			} else {
+				candidateLabel.classList.add("fail-upload");
+				candidateLabel.classList.remove("success-upload");
+				candidateLabel.innerHTML = '<h3>' + candidateLabel.files[0].name + ' is too large</h3>';
+			}
+		}
+		candidateInput.onchange = validateCandidates;
+		validateCandidates();
+
+		// Validate candidate fields
+		const field1 = document.getElementById("loginField1");
+		const field1Desc = document.getElementById("loginField1Desc");
+		const field2 = document.getElementById("loginField2");
+		const field2Desc = document.getElementById("loginField2Desc");
+		const validateCandidateFields = () => {
+			field1Desc.required = !(field1.value === "None");
+			field2Desc.required = !(field2.value === "None");
+		}
+		field1.onchange = validateCandidateFields;
+		field2.onchange = validateCandidateFields;
+		validateCandidateFields();
+
+		deleteCandidatesBtn = document.getElementById("delete-candidates-btn");
+		deleteCandidatesBtn.onclick = (event) => {
+			event.preventDefault();
+			document.getElementById("")
+		}
+	</script>
+</body>
+</html>
