@@ -88,11 +88,18 @@
 						SET CUTOFF MARK
 					</label>
 					<br>
+					<br>
 					<label>
 						PAPERS PER CANDIDATE
 						<br>
 						<input type="number" th:field="*{papersPerCandidate}" th:max="*{#lists.size(modifyPapers)}" min="1" class="text-center border br-16">
 					</label>
+					<br>
+					<label>
+						<input type="checkbox" th:field="*{showResult}">
+						SHOW RESULTS
+					</label>
+					<br>
 					<br>
 					<!-- Papers -->
 					 <th:block th:if="${showPapers}">

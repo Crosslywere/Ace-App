@@ -3,6 +3,7 @@ package com.ace.app.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Controller for the dashboard on the server machine
  * @author Ogboru Jude
- * @version 17-June-2024
+ * @version 18-June-2024
  */
 @Controller
 public class DashboardController {
@@ -121,14 +122,14 @@ public class DashboardController {
 	 * @return A template containing results from the search
 	 */
 	@PostMapping( "/search" )
-	public String search( String title, Model model, HttpServletRequest request ) {
+	public String search( @Param( "search" ) String search, Model model, HttpServletRequest request ) {
 		// TODO implement
 		if ( isLocalhost( request ) ) {
-			if ( title == null || title.isBlank() ) {
+			if ( search == null || search.isBlank() ) {
 				return "redirect:/advanced-search";
 			}
-			List<Exam> exams = examService.getExamsByTitleLike( title );
-			model.addAttribute( "exams", exams );
+			List<Exam> exams = examService.getExamsByTitleLike( search );
+			model.addAttribute( "results", exams );
 			return "dashboard/search";
 		}
 		return "redirect:/exam";

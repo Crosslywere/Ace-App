@@ -11,7 +11,7 @@ Go to [starter.spring.io](https://start.spring.io/#!type=maven-project&language=
 4. Administrators should be able to set how examinees are identified for login.
 	> Implemented
 5. Answers should be able to be set in questions uploaded to the software.
-	> Implemented 
+	> Implemented
 6. Exporting the results of the exam should be a CSV file.
 7. Exporting of the results should be customizable.
 8. Change the question numbers to be more visible on the exam page for examinees.

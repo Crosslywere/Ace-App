@@ -19,7 +19,7 @@ import com.ace.app.service.ExamService;
 
 /**
  * @author Ogboru Jude
- * @version 17-June-2024
+ * @version 18-June-2024
  */
 @Service
 public class ExamServiceImpl implements ExamService {
@@ -92,8 +92,7 @@ public class ExamServiceImpl implements ExamService {
 	}
 
 	public List<Exam> getExamsByTitleLike( String title ) {
-		// TODO implement
-		return null;
+		return examRepository.findByTitleContainingIgnoreCase( title );
 	}
 
 	@Override
@@ -174,6 +173,10 @@ public class ExamServiceImpl implements ExamService {
 			}
 			if ( oldExam.getAllowCutOffMark() && replacement.getCutOffMark() != oldExam.getCutOffMark() ) {
 				oldExam.setCutOffMark( replacement.getCutOffMark() );
+				shouldSave = true;
+			}
+			if ( oldExam.getShowResult() != replacement.getShowResult() ) {
+				oldExam.setShowResult( replacement.getShowResult() );
 				shouldSave = true;
 			}
 			if ( !replacement.getLoginField1().equals( oldExam.getLoginField1() ) ) {

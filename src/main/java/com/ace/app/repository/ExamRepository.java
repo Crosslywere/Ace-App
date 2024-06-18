@@ -9,7 +9,7 @@ import com.ace.app.model.ExamState;
 
 /**
  * @author Ogboru Jude
- * @version 20-May-2024
+ * @version 18-June-2024
  */
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, Long> {
@@ -17,4 +17,6 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
 	List<Exam> findByState( ExamState state );
 
 	long countByState( ExamState state );
+
+	List<Exam> findByTitleContainingIgnoreCase( String title );
 }

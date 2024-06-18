@@ -20,7 +20,7 @@ import lombok.Setter;
 
 /**
  * @author Ogboru Jude
- * @version 04-June-2024
+ * @version 18-June-2024
  */
 @Getter
 @Setter
@@ -86,8 +86,8 @@ public class CreateExamDTO extends BaseExamDTO {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Reads the candidate multipart file and returns a boolean based on if there were any candiadates extracted from the multipart file
+	 * @return {@code true} if the parsed document has extracted exam candidates from the document, otherwise {@code false}
 	 */
 	public boolean parseCandidateLoginInfoDocument() {
 		if ( candidateLoginInfoDocument == null || candidateLoginInfoDocument.isEmpty() ) {
@@ -110,10 +110,10 @@ public class CreateExamDTO extends BaseExamDTO {
 	}
 
 	/**
-	 * 
-	 * @param text The text gotten from the file stream.
+	 * Processes the string containing the papers with their questions
+	 * @param text The text gotten from the file stream that contains the papers and their questions.
 	 * @param self The instance of the class to be used to set show result.
-	 * @return
+	 * @return A map of paper titles with the papers attached.
 	 */
 	protected static Map<String, CreatePaperDTO> parsePapers( String text, CreateExamDTO self ) {
 		self.setShowResult( true );
@@ -219,10 +219,10 @@ public class CreateExamDTO extends BaseExamDTO {
 	}
 
 	/**
-	 * 
+	 * Processes the string containing the candidates either as a single column or a double column
 	 * @param text The text gotten from the file stream.
 	 * @param self The instance of the class to be used to set the login fields.
-	 * @return 
+	 * @return A list of candidate credentials.
 	 */
 	 protected static List<CreateCandidateDTO> parseCandidates( String text, CreateExamDTO self ) {
 		Scanner scanner = new Scanner( text );
@@ -242,13 +242,14 @@ public class CreateExamDTO extends BaseExamDTO {
 				firstLine = false;
 				List<String> columnHeads = parseCSVLine( line );
 				if ( columnHeads.isEmpty() ) {
-					scanner.close();
-					return candidates;
+					// scanner.close();
+					// return candidates;
+					continue;
 				}
 				if ( columnHeads.size() == 1 ) {
 					singleColumn = true;
 					String str = columnHeads.get( 0 );
-					if ( !str.isBlank() ) {
+					if ( !str.isBlank() && self.getLoginField1Desc().isBlank() ) {
 						self.setLoginField1Desc( str );
 						// If the line contains mail
 						if ( str.matches( "^[\\S\\s]*[Mm][Aa][Ii][Ll][\\S\\s]*$" ) ) {
@@ -270,7 +271,7 @@ public class CreateExamDTO extends BaseExamDTO {
 					self.setLoginField2Desc( null );
 				} else {
 					String str1 = columnHeads.get( 0 ), str2 = columnHeads.get( 1 );
-					if ( !str1.isBlank() ) {
+					if ( !str1.isBlank() && self.getLoginField1Desc().isBlank() ) {
 						self.setLoginField1Desc( str1 );
 						// If the line contains mail
 						if ( str1.matches( "^[\\S\\s]*[Mm][Aa][Ii][Ll][\\S\\s]*$" ) ) {
@@ -288,7 +289,7 @@ public class CreateExamDTO extends BaseExamDTO {
 							self.setLoginField1( CandidateField.Text );
 						}
 					}
-					if ( !str2.isBlank() ) {
+					if ( !str2.isBlank() && self.getLoginField2Desc().isBlank() ) {
 						self.setLoginField2Desc( str2 );
 						// If the line contains mail
 						if ( str2.matches( "^[\\S\\s]*[Mm][Aa][Ii][Ll][\\S\\s]*$" ) ) {
@@ -334,9 +335,9 @@ public class CreateExamDTO extends BaseExamDTO {
 	}
 
 	/**
-	 * 
-	 * @param line
-	 * @return 
+	 * Takes in a comma seperated line and seperates it into the individual data entries
+	 * @param line A comma seperated line
+	 * @return The individual data columns in the CSV line in a list.
 	 */
 	protected static List<String> parseCSVLine( String line ) {
 		List<String> columns = new ArrayList<>();
