@@ -19,7 +19,7 @@ import com.ace.app.service.ExamService;
 
 /**
  * @author Ogboru Jude
- * @version 18-June-2024
+ * @version 19-June-2024
  */
 @Service
 public class ExamServiceImpl implements ExamService {
@@ -201,9 +201,10 @@ public class ExamServiceImpl implements ExamService {
 			}
 			if ( examDTO.getPaperTodo() == ModifyTodo.Replace && !replacement.getPapers().isEmpty() ) {
 				oldExam.getPapers().clear();
+				examRepository.save( oldExam );
 				oldExam.getPapers().addAll( replacement.getPapers() );
 				shouldSave = true;
-			} else if ( examDTO.getPaperTodo() != ModifyTodo.Ignore && examDTO.getPaperTodo() != ModifyTodo.Delete ) {
+			} else if ( examDTO.getPaperTodo() != ModifyTodo.Ignore ) {
 				replacement.getPapers().forEach( paper -> {
 					boolean handled = false;
 					for ( int i = 0; i < oldExam.getPapers().size(); i++ ) {
@@ -219,11 +220,7 @@ public class ExamServiceImpl implements ExamService {
 				} );
 				shouldSave = true;
 			}
-			if ( examDTO.getCandidateTodo() == ModifyTodo.Delete ) {
-				oldExam.getCandidates().clear();
-				oldExam.setRegistrationLocked( false );
-				shouldSave = true;
-			} else if ( examDTO.getCandidateTodo() != ModifyTodo.Ignore ) {
+			if ( examDTO.getCandidateTodo() != ModifyTodo.Ignore ) {
 				if ( examDTO.getCandidateTodo() == ModifyTodo.Replace ) {
 					oldExam.getCandidates().clear();
 				}

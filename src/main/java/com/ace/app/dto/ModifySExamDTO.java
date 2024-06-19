@@ -16,7 +16,7 @@ import lombok.Setter;
 
 /**
  * @author Ogboru Jude
- * @version 17-June-2024
+ * @version 19-June-2024
  */
 @Getter
 @Setter
@@ -105,9 +105,6 @@ public final class ModifySExamDTO extends CreateExamDTO {
 			case Ignore -> {
 				return false;
 			}
-			case Delete -> {
-				return false;
-			}
 		}
 		return true;
 	}
@@ -144,15 +141,12 @@ public final class ModifySExamDTO extends CreateExamDTO {
 				}
 			}
 			case Replace -> {
+				modifyCandidates.clear();
 				candidateList.forEach( candidateDTO -> {
 					modifyCandidates.add( new ModifySCandidateDTO( candidateDTO ) );
 				} );
 			}
 			case Ignore -> {
-				return false;
-			}
-			case Delete -> {
-				modifyCandidates.clear();
 				return false;
 			}
 		}

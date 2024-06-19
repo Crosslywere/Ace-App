@@ -71,6 +71,9 @@ body {
 .blue-text {
 	color: #3498DB;
 }
+.danger-text {
+	color: #FF1800;
+}
 .fit-height {
 	height: fit-content;
 }

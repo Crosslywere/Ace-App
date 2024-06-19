@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Controller for the dashboard on the server machine
  * @author Ogboru Jude
- * @version 18-June-2024
+ * @version 19-June-2024
  */
 @Controller
 public class DashboardController {
@@ -259,6 +259,7 @@ public class DashboardController {
 			if ( exam == null ) {
 				return "redirect:/scheduled";
 			}
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			switch ( exam.getState() ) {
 				case Scheduled -> {
 					ModifySExamDTO examDTO = new ModifySExamDTO( exam );
@@ -290,12 +291,26 @@ public class DashboardController {
 		if ( isLocalhost( request ) ) {
 			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
 			if ( exam != null && exam.getState() == ExamState.Scheduled ) {
+				model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 				model.addAttribute( "showPapers", examDTO.parsePaperDocument() );
 				model.addAttribute( "showCandidates", examDTO.parseCandidateLoginInfoDocument() );
 				model.addAttribute( "exam", examDTO );
 				return "dashboard/review-modify-scheduled";
 			}
 			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	@PostMapping( "/modify/ongoing/review" )
+	public String modifyOngoing( ModifyOExamDTO examDTO, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
+			if ( exam != null && exam.getState() == ExamState.Ongoing ) {
+				model.addAttribute( "exam", examDTO );
+				return "dashboard/review-modify-ongoing";
+			}
+			return "redirect:/ongoing";
 		}
 		return "redirect:/exam";
 	}
@@ -314,6 +329,15 @@ public class DashboardController {
 				examService.update( examDTO );
 			}
 			return "redirect:/scheduled";
+		}
+		return "redirect:/exam";
+	}
+
+	@PostMapping( "/modify/ongoing" )
+	public String modifyOngoing( ModifyOExamDTO examDTO, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+
+			return "redirect:/ongoing";
 		}
 		return "redirect:/exam";
 	}

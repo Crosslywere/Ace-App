@@ -3,9 +3,162 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Modify Exam</title>
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<link rel="stylesheet" th:href="@{/css/dashboard.css}">
+	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<style>
+		.container {
+			width: 806px;
+			height: fit-content;
+		}
+		.flex-row > label {
+			flex: 0.5;
+			max-width: 340px;
+		}
+	</style>
+	<title th:text="|Modify ${exam.title} (Ongoing)|">Modify Exam</title>
 </head>
-<body>
-	
+<body class="offwhite-bg">
+	<div class="flex-row" style="height:fit-content">
+		<div class="menu flex-col align-center white-bg">
+			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+			<details open>
+				<summary class="flex-row justify-between align-center br-16" style="width:271px;background-color:#0F29420A;padding:12px 16px;"><span class="flex align-center"><img th:src="@{/images/dashboard-icon.svg}" alt="dashboard-icon" class="mr-8">Dashboard</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+				<ul style="list-style:none;margin:15px 0 0 25px;padding-left:23px;" class="border-left">
+					<li><a th:href="@{/scheduled}">Currently Scheduled Exam</a></li>
+					<li><a th:href="@{/recorded}">Exam Record</a></li>
+					<li><a th:href="@{/ongoing}" class="blue-text">Ongoing Exams</a></li>
+					<li><a th:href="@{/create}">Create New Exam</a></li>
+					<li><a th:href="@{/advanced-search}">Advanced Search</a></li>
+				</ul>
+			</details>
+		</div>
+		<div class="flex-col align-center width-minus-menu">
+			<div class="fit-height white-bg width-100 border-bottom">
+				<div class="container flex-row justify-between align-center" style="margin:19px auto;">
+					<form th:action="@{/search}" method="post" style="position:relative">
+						<input type="text" name="search" placeholder="Search Exams By Title" class="border br-16">
+						<button type="submit" class="none-btn" style="position:absolute;top:10px;right:14px;cursor:pointer;"><img th:src="@{/images/search.svg}" alt="Search"></button>
+					</form>
+					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
+				</div>
+			</div>
+			<div class="container white-bg br-16 border flex-col fit-height" style="padding:0 53px 53px 53px;margin-top:55px;">
+				<h2 th:text="|Modify ${exam.title} (Ongoing)|">Modify Exam</h2>
+				<form th:action="@{/modify/ongoing/review}" th:object="${exam}" method="post" enctype="multipart/form-data">
+					<input type="number" th:field="*{examId}" hidden>
+					<label>
+						TITLE
+						<br>
+						<input type="text" th:field="*{title}" class="border br-16" required>
+					</label>
+					<br>
+					<label>
+						END TIME
+						<br>
+						<input type="time" th:field="*{endTime}" class="text-center border br-16">
+					</label>
+					<br>
+					<label id="slider">
+						CUTOFF MARK &nbsp;&nbsp;<span id="pass-value"></span>
+						<br>
+						<input type="range" th:field="*{cutOffMark}" min="0" max="1" step="0.05">
+					</label>
+					<label>
+						<input type="checkbox" th:field="*{allowCutOffMark}">
+						SET CUTOFF MARK
+						<br>
+					</label>
+					<br>
+					<label>
+						<input type="checkbox" th:field="*{showResult}">
+						SHOW RESULTS
+						<br>
+					</label>
+					<br>
+					<details>
+						<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px"><span>Candidates</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+						<br>
+						<label>
+							<input type="checkbox" th:field="*{registrationLocked}">
+							REGISTRATION LOCKED
+							<br>
+						</label>
+						<br>
+						<div class="flex-row justify-between">
+							<label>
+								FIELD 1
+								<br>
+								<select th:field="*{loginField1}" class="text-center border br-16">
+									<th:block th:each="field : ${T(com.ace.app.model.CandidateField).values()}">
+									<th:block th:unless="${field.name == 'None' || field.name == 'Password'}">
+										<option th:value="${field}" th:text="|${field.name}|"></option>
+									</th:block>
+								</select>
+								<input type="text" th:field="*{loginField1Desc}" class="text-center border br-16" placeholder="Field 1 Descriptor" required>
+							</label>
+							<label>
+								FIELD 2
+								<br>
+								<select th:field="*{loginField2}" class="text-center border br-16">
+									<th:block th:each="field : ${T(com.ace.app.model.CandidateField).values()}">
+										<option th:value="${field}" th:text="|${field.name}|"></option>
+									</th:block>
+								</select>
+								<input type="text" th:field="*{loginField2Desc}" class="text-center border br-16" placeholder="Field 2 Descriptor" required>
+							</label>
+						</div>
+						<table class="width-100">
+							<thead>
+								<tr>
+									<th>Field 1</th>
+									<th>Field 2</th>
+									<th>Logged In</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="candidate, candidateStat : *{candidates}">
+									<td class="text-center"><th:block th:text="${candidate.field1}"></th:block><input type="text" th:field="*{candidates[__${candidateStat.index}__].field1}" hidden></td>
+									<td class="text-center"><th:block th:text="${candidate.field2}"></th:block><input type="text" th:field="*{candidates[__${candidateStat.index}__].field2}" hidden></td>
+									<th:block>
+										<td>
+											<div class="flex justify-center">
+												<th:block th:if="${!candidate.submitted}">
+													<input type="checkbox" th:field="*{candidates[__${candidateStat.index}__].hasLoggedIn}" th:disabled="${!candidate.hasLoggedIn}">
+												</th:block>
+												<th:block th:if="${candidate.submitted}">
+													<span class="danger-text">Submitted</span>
+												</th:block>
+											</div>
+										</td>
+									</th:block>
+								</tr>
+							</tbody>
+						</table>
+					</details>
+					<br>
+					<div class="flex justify-end">
+						<button type="submit" class="action-btn br-16">Review</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+		// CutOff mark modification
+		const slider = document.getElementById('cutOffMark');
+		const sliderVal = document.getElementById('pass-value');
+		sliderVal.innerHTML = (slider.value * 100) + '%';
+		slider.addEventListener('change', () => {
+			sliderVal.innerHTML = (slider.value * 100) + '%';
+		});
+		const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
+		if (allowCutOffMark) {
+			document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			allowCutOffMark.addEventListener("change", () => {
+				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			});
+		}
+	</script>
 </body>
 </html>
