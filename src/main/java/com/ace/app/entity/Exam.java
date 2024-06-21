@@ -28,7 +28,7 @@ import lombok.Setter;
 
 /**
  * @author Ogboru Jude
- * @version 10-June-2024
+ * @version 21-June-2024
  */
 @Entity
 @Getter
@@ -154,7 +154,21 @@ public class Exam {
 	}
 
 	public Exam( ModifyOExamDTO examDTO ) {
-		
+		examId = examDTO.getExamId();
+		title = examDTO.getTitle();
+		endTime = Time.valueOf( examDTO.getEndTime() + ":00" );
+		state = ExamState.Ongoing;
+		cutOffMark = examDTO.getCutOffMark();
+		showResult = examDTO.getShowResult();
+		loginField1 = examDTO.getLoginField1();
+		loginField1Desc = examDTO.getLoginField1Desc();
+		loginField2 = examDTO.getLoginField2();
+		loginField2Desc = examDTO.getLoginField2Desc();
+		registrationLocked = examDTO.getRegistrationLocked();
+		candidates = new ArrayList<>();
+		examDTO.getCandidates().forEach( candidateDTO -> {
+			candidates.add( new Candidate( candidateDTO, this ) );
+		} );
 	}
 
 	public List<Candidate> getCandidatesSubmitted() {

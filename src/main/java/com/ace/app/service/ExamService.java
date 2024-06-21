@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ace.app.dto.CreateExamDTO;
+import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
 import com.ace.app.entity.Exam;
 import com.ace.app.model.ExamState;
 
 /**
  * @author Ogboru Jude
- * @version 31-May-2024
+ * @version 21-June-2024
  */
 public interface ExamService {
 
@@ -78,4 +79,10 @@ public interface ExamService {
 	 * @param examDTO
 	 */
 	void update( ModifySExamDTO examDTO );
+
+	/**
+	 * TODO describe
+	 * @param examDTO
+	 */
+	void update( ModifyOExamDTO examDTO );
 }

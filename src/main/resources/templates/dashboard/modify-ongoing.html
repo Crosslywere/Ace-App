@@ -16,7 +16,7 @@
 			max-width: 340px;
 		}
 	</style>
-	<title th:text="|Modify ${exam.title} (Ongoing)|">Modify Exam</title>
+	<title th:text="|Modify ${exam.title} (Ongoing)|">Modify Exam (Ongoing)</title>
 </head>
 <body class="offwhite-bg">
 	<div class="flex-row" style="height:fit-content">
@@ -45,7 +45,7 @@
 			</div>
 			<div class="container white-bg br-16 border flex-col fit-height" style="padding:0 53px 53px 53px;margin-top:55px;">
 				<h2 th:text="|Modify ${exam.title} (Ongoing)|">Modify Exam</h2>
-				<form th:action="@{/modify/ongoing/review}" th:object="${exam}" method="post" enctype="multipart/form-data">
+				<form th:action="@{/modify/ongoing/review}" th:object="${exam}" method="post">
 					<input type="number" th:field="*{examId}" hidden>
 					<label>
 						TITLE
@@ -124,11 +124,13 @@
 										<td>
 											<div class="flex justify-center">
 												<th:block th:if="${!candidate.submitted}">
-													<input type="checkbox" th:field="*{candidates[__${candidateStat.index}__].hasLoggedIn}" th:disabled="${!candidate.hasLoggedIn}">
+													<input type="checkbox" th:field="*{candidates[__${candidateStat.index}__].hasLoggedIn}" th:disabled="${!candidate.oldHasLoggedIn}">
 												</th:block>
 												<th:block th:if="${candidate.submitted}">
 													<span class="danger-text">Submitted</span>
 												</th:block>
+												<input type="checkbox" th:field="*{candidates[__${candidateStat.index}__].oldHasLoggedIn}" hidden>
+												<input type="checkbox" th:field="*{candidates[__${candidateStat.index}__].submitted}" hidden>
 											</div>
 										</td>
 									</th:block>

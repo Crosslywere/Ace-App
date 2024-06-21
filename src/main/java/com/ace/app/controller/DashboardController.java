@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Controller for the dashboard on the server machine
  * @author Ogboru Jude
- * @version 19-June-2024
+ * @version 21-June-2024
  */
 @Controller
 public class DashboardController {
@@ -336,7 +336,10 @@ public class DashboardController {
 	@PostMapping( "/modify/ongoing" )
 	public String modifyOngoing( ModifyOExamDTO examDTO, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
-
+			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
+			if ( exam != null && exam.getState() == ExamState.Ongoing ) {
+				examService.update( examDTO );
+			}
 			return "redirect:/ongoing";
 		}
 		return "redirect:/exam";

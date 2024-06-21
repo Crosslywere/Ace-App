@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ace.app.dto.CreateCandidateDTO;
+import com.ace.app.dto.ModifyOCandidateDTO;
 import com.ace.app.dto.ModifySCandidateDTO;
 import com.ace.app.model.CandidateId;
 
@@ -22,7 +23,7 @@ import lombok.Setter;
  * Candidate class represents a candidate that can write an exam.
  * 
  * @author Ogboru Jude
- * @version 08-June-2024
+ * @version 21-June-2024
  */
 @Getter
 @Setter
@@ -58,6 +59,12 @@ public class Candidate {
 
 	public Candidate( ModifySCandidateDTO candidateDTO, Exam exam ) {
 		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
+	}
+
+	public Candidate( ModifyOCandidateDTO candidateDTO, Exam exam ) {
+		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
+		this.hasLoggedIn = candidateDTO.getHasLoggedIn();
+		this.submitted = candidateDTO.getSubmitted();
 	}
 
 	public Exam getExam() {
