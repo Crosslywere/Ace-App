@@ -43,15 +43,18 @@
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
 	</div>
 	<form th:action="@{/exam}" th:object="${candidate}" method="post" class="container">
-		<div>
-			<input type="number" th:field="*{examId}" hidden>
-			<th:block th:each="paperName : *{paperNames}">
-				<input type="text" th:field="*{paperNames}" th:value="${paperName}" hidden>
-			</th:block>
-		</div>
+		<input type="number" th:field="*{examId}" hidden>
 		<h2 class="text-center">Login</h2>
 		<p class="text-center">Enter the required credentials.</p>
-		<label>
+		<label th:unless="${field1.name == 'None'}">
+			<th:block th:text="${field1Desc}"></th:block>
+			<input th:type="${field1.type}" th:field="*{field1}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+		</label>
+		<label th:unless="${field2.name == 'None'}">
+			<th:block th:text="${field2Desc}"></th:block>
+			<input th:type="${field2.type}" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
+		</label>
+		<!-- <label>
 			<span th:text="${field1}"></span>
 			<th:block th:switch="${field1}">
 				<th:block th:case="${T(com.ace.app.model.CandidateInfo).Email.representation}">
@@ -86,7 +89,7 @@
 					</th:block>
 				</th:block>
 			</label>
-		</th:block>
+		</th:block> -->
 		<button type="submit" class="action-btn width-100 br-16">Login</button>
 	</form>
 </body>

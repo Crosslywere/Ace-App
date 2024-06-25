@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.ace.app.entity.Exam;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -29,5 +30,8 @@ public class CandidateId implements Serializable {
 	@JoinColumn( name = "exam_id" )
 	Exam exam;
 
-	String field1, field2;
+	String field1;
+
+	@Column( nullable = true )
+	String field2;
 }

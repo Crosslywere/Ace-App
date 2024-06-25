@@ -161,6 +161,19 @@
 				document.getElementById('slider').hidden = !allowCutOffMark.checked;
 			});
 		}
+		
+		// Validate candidate fields
+		const field1 = document.getElementById("loginField1");
+		const field1Desc = document.getElementById("loginField1Desc");
+		const field2 = document.getElementById("loginField2");
+		const field2Desc = document.getElementById("loginField2Desc");
+		const validateCandidateFields = () => {
+			field1Desc.required = !(field1.value === "None");
+			field2Desc.required = !(field2.value === "None");
+		}
+		field1.onchange = validateCandidateFields;
+		field2.onchange = validateCandidateFields;
+		validateCandidateFields();
 	</script>
 </body>
 </html>

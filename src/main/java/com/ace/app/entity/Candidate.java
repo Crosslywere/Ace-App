@@ -3,9 +3,8 @@ package com.ace.app.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ace.app.dto.CreateCandidateDTO;
+import com.ace.app.dto.BaseCandidateDTO;
 import com.ace.app.dto.ModifyOCandidateDTO;
-import com.ace.app.dto.ModifySCandidateDTO;
 import com.ace.app.model.CandidateId;
 
 import jakarta.persistence.Column;
@@ -23,7 +22,7 @@ import lombok.Setter;
  * Candidate class represents a candidate that can write an exam.
  * 
  * @author Ogboru Jude
- * @version 21-June-2024
+ * @version 22-June-2024
  */
 @Getter
 @Setter
@@ -53,16 +52,12 @@ public class Candidate {
 	@OneToMany
 	private List<CandidateQuestionAnswerMapping> questionAnswerMapping;
 
-	public Candidate( CreateCandidateDTO candidateDTO, Exam exam ) {
-		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
-	}
-
-	public Candidate( ModifySCandidateDTO candidateDTO, Exam exam ) {
-		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
+	public Candidate( BaseCandidateDTO candidateDTO, Exam exam ) {
+		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
 	}
 
 	public Candidate( ModifyOCandidateDTO candidateDTO, Exam exam ) {
-		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
+		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
 		this.hasLoggedIn = candidateDTO.getHasLoggedIn();
 		this.submitted = candidateDTO.getSubmitted();
 	}

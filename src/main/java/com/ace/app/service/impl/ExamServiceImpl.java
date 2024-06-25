@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.ace.app.dto.CreateExamDTO;
 import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
+import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
 import com.ace.app.model.ExamState;
 import com.ace.app.model.ModifyTodo;
@@ -20,7 +21,7 @@ import com.ace.app.service.ExamService;
 
 /**
  * @author Ogboru Jude
- * @version 21-June-2024
+ * @version 22-June-2024
  */
 @Service
 public class ExamServiceImpl implements ExamService {
@@ -257,55 +258,47 @@ public class ExamServiceImpl implements ExamService {
 		}
 		Exam oldExam = examRepository.findById( examDTO.getExamId() ).orElse( null );
 		if ( oldExam != null ) {
-			boolean shouldSave = false;
 			Exam replacement = new Exam( examDTO );
 			if ( !replacement.getTitle().equals( oldExam.getTitle() ) ) {
 				oldExam.setTitle( replacement.getTitle() );
-				shouldSave = true;
 			}
 			if ( replacement.getEndTime().compareTo( oldExam.getEndTime() ) != 0 ) {
 				oldExam.setEndTime( replacement.getEndTime() );
-				shouldSave = true;
 			}
 			if ( replacement.getAllowCutOffMark() != oldExam.getAllowCutOffMark() ) {
 				oldExam.setAllowCutOffMark( replacement.getAllowCutOffMark() );
-				shouldSave = true;
 			}
 			if ( oldExam.getAllowCutOffMark() && replacement.getCutOffMark() != oldExam.getCutOffMark() ) {
 				oldExam.setCutOffMark( replacement.getCutOffMark() );
-				shouldSave = true;
 			}
 			if ( !replacement.getLoginField1().equals( oldExam.getLoginField1() ) ) {
 				oldExam.setLoginField1( replacement.getLoginField1() );
-				shouldSave = true;
 			}
 			if ( !replacement.getLoginField1Desc().equals( oldExam.getLoginField1Desc() ) ) {
 				oldExam.setLoginField1Desc( replacement.getLoginField1Desc() );
-				shouldSave = true;
 			}
 			if ( !replacement.getLoginField2().equals( oldExam.getLoginField2() ) ) {
 				oldExam.setLoginField2( replacement.getLoginField2() );
-				shouldSave = true;
 			}
 			if ( !replacement.getLoginField2Desc().equals( oldExam.getLoginField2Desc() ) ) {
 				oldExam.setLoginField2Desc( replacement.getLoginField2Desc() );
-				shouldSave = true;
 			}
 			if ( replacement.getRegistrationLocked() != oldExam.getRegistrationLocked() ) {
 				oldExam.setRegistrationLocked( replacement.getRegistrationLocked() );
-				shouldSave = true;
 			}
 			replacement.getCandidates().forEach( candidate -> {
-				// TODO implement candidate variables
+				for ( Candidate oldCandidate : oldExam.getCandidates() ) {
+					if ( oldCandidate.getField1().equals( candidate.getField1() ) && oldCandidate.getField2().equals( candidate.getField2() ) ) {
+						if ( !oldCandidate.getSubmitted() && candidate.getHasLoggedIn() != null ) {
+							oldCandidate.setHasLoggedIn( candidate.getHasLoggedIn() );
+						}
+						break;
+					} 
+				}
 			} );
 			updateExamState( oldExam );
 			cleanup();
-			if ( oldExam.getState() != ExamState.Ongoing ) {
-				shouldSave = true;
-			}
-			if ( shouldSave ) {
-				examRepository.save( oldExam );
-			}
+			examRepository.save( oldExam );
 		}
 	}
 }
