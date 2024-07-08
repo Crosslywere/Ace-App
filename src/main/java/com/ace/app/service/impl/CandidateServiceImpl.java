@@ -1,15 +1,20 @@
 package com.ace.app.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ace.app.dto.LoginExamCandidateDTO;
+import com.ace.app.dto.RegisterCandidateDTO;
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
 import com.ace.app.entity.Paper;
+import com.ace.app.model.CandidateException;
+import com.ace.app.model.CandidateExceptionType;
 import com.ace.app.model.CandidateId;
 import com.ace.app.model.ExamState;
 import com.ace.app.model.PaperId;
@@ -23,6 +28,7 @@ import com.ace.app.service.CandidateService;
  * @version 25-June-2024
  */
 @Service
+@SuppressWarnings( "unused" )
 public class CandidateServiceImpl implements CandidateService {
 	
 	@Autowired
@@ -34,54 +40,77 @@ public class CandidateServiceImpl implements CandidateService {
 	@Autowired
 	private PaperRepository paperRepository;
 
-	public LoginExamCandidateDTO login( LoginExamCandidateDTO candidateDTO ) {
-		if ( candidateDTO.getExamId() == null ) {
-			return null;
+	@Override
+	public Candidate putCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
+			throw new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null );
 		}
 		Exam exam = examRepository.findById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
-			// The exam trying to be written isn't available to be written
-			return null;
+			throw new CandidateException( "Invalid exam selected (may not be ongoing)", CandidateExceptionType.INVALID_EXAM, null );
 		}
-		Candidate candidate = candidateRepository.findById( new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() ) )
-			.orElse( new Candidate( candidateDTO, exam ) );
-		if ( candidate.getPapers() == null || candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
-			List<Paper> papers = new ArrayList<>();
-			candidateDTO.getPaperNames().forEach( name -> {
-				Paper paper = paperRepository.findById( new PaperId( exam, name ) ).orElse( null );
+		Candidate tempCandidate = new Candidate( candidateDTO, exam );
+		if ( exam.getRegistrationLocked() ) {
+			Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
+			if ( candidate != null ) {
+				return candidate;
+			} else {
+				throw new CandidateException( "Invalid Credentials", CandidateExceptionType.INVALID_CREDENTIALS, candidateDTO );
+			}
+		} else {
+			Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
+			if ( candidate != null ) {
+				return candidate;
+			} else {
+				return candidateRepository.save( tempCandidate );
+			}
+		}
+	}
+
+	@Override
+	public Candidate loginCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
+			throw new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() ).orElse( null );
+		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null );
+		}
+		Candidate candidate = candidateRepository.findById( new Candidate( candidateDTO, exam ).getCandidateId() ).orElse( null );
+		if ( candidate == null ) {
+			throw new CandidateException( "Unregistered candidate", CandidateExceptionType.INVALID_CREDENTIALS, candidateDTO );
+		}
+		if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
+			candidate.getPapers().clear();
+			candidateDTO.getPaperNames().forEach( paperName -> {
+				Paper paper = paperRepository.findById( new PaperId( exam, paperName ) ).orElse( null );
 				if ( paper != null ) {
-					papers.add( paper );
+					candidate.getPapers().add( paper );
 				}
 			} );
-			if ( papers.size() == exam.getPapersPerCandidate() ) {
-				if ( candidate.getPapers() == null ) {
-					candidate.setPapers( new ArrayList<>() );
+			if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
+				throw new CandidateException( "Invalid number of papers selected", CandidateExceptionType.INVALID_CANDIDATE, candidateDTO );
+			} else {
+				for ( Paper paper : exam.getPapers() ) {
+					if ( paper.getManditory() ) {
+						if ( !candidate.getPapers().contains( paper ) ) {
+							throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_COUNT, candidateDTO );
+						}
+					}
 				}
-				candidate.getPapers().addAll( papers );
 				candidate.setHasLoggedIn( true );
+				return candidateRepository.save( candidate );
 			}
-		} else if ( candidate.getPapers() != null && candidate.getPapers().size() == exam.getPapersPerCandidate() ) {
-			candidate.setHasLoggedIn( true );
-			return new LoginExamCandidateDTO( candidateRepository.save( candidate ) );
-		}
-		if ( exam.getRegistrationLocked() ) {
-			for ( Candidate _candidate : exam.getCandidates() ) {
-				if ( candidate.getCandidateId().equals( _candidate.getCandidateId() ) && !_candidate.getHasLoggedIn() ) {
-					return new LoginExamCandidateDTO( candidateRepository.save( candidate ) );
-				} else if ( candidate.getCandidateId().equals( _candidate.getCandidateId() ) && _candidate.getHasLoggedIn() ) {
-					// The candidate has already logged in previously
-					return null;
+		} else {
+			for ( Paper paper : exam.getPapers() ) {
+				if ( paper.getManditory() ) {
+					if ( !candidate.getPapers().contains( paper ) ) {
+						throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_COUNT, candidateDTO );
+					}
 				}
 			}
-			// The candidate's credientials are not registered
-			return null;
+			candidate.setHasLoggedIn( true );
+			return candidateRepository.save( candidate );
 		}
-		for ( Candidate _candidate : exam.getCandidates() ) {
-			if ( candidate.getCandidateId().equals( _candidate.getCandidateId() ) && _candidate.getHasLoggedIn() ) {
-				// The candidate has already logged in previously
-				return null;
-			}
-		}
-		return new LoginExamCandidateDTO( candidateRepository.save( candidate ) );
 	}
 }

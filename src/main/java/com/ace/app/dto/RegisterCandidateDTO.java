@@ -5,28 +5,29 @@ import java.util.List;
 
 import com.ace.app.entity.Candidate;
 
+import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * @author Ogboru Jude
- * @version 22-June-2024
+ * @version 01-July-2024
  */
 @Getter
 @Setter
 @NoArgsConstructor
-public class LoginExamCandidateDTO extends BaseCandidateDTO {
+public class RegisterCandidateDTO extends BaseCandidateDTO {
 
 	private Long examId;
 	private List<String> paperNames = new ArrayList<>();
 
-	public LoginExamCandidateDTO( Candidate candidate ) {
+	public RegisterCandidateDTO( @NonNull Candidate candidate ) {
 		super();
 		super.field1 = candidate.getField1();
 		super.field2 = candidate.getField2();
-		examId = candidate.getExam().getExamId();
-		paperNames = new ArrayList<>();
+		this.examId = candidate.getExam().getExamId();
+		this.paperNames = new ArrayList<>();
 		candidate.getPapers().forEach( paper -> {
 			paperNames.add( paper.getName() );
 		} );

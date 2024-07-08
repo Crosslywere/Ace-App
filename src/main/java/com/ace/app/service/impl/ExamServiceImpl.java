@@ -21,7 +21,7 @@ import com.ace.app.service.ExamService;
 
 /**
  * @author Ogboru Jude
- * @version 22-June-2024
+ * @version 29-June-2024
  */
 @Service
 public class ExamServiceImpl implements ExamService {
@@ -270,6 +270,9 @@ public class ExamServiceImpl implements ExamService {
 			}
 			if ( oldExam.getAllowCutOffMark() && replacement.getCutOffMark() != oldExam.getCutOffMark() ) {
 				oldExam.setCutOffMark( replacement.getCutOffMark() );
+			}
+			if ( oldExam.getShowResult() != replacement.getShowResult() ) {
+				oldExam.setShowResult( replacement.getShowResult() );
 			}
 			if ( !replacement.getLoginField1().equals( oldExam.getLoginField1() ) ) {
 				oldExam.setLoginField1( replacement.getLoginField1() );
