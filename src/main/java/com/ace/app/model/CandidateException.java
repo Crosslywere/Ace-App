@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * @author Ogboru Jude
- * @version 01-July-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Getter
 public class CandidateException extends Exception {
@@ -17,5 +17,13 @@ public class CandidateException extends Exception {
 		super( message );
 		this.type = type;
 		this.object = object;
+	}
+
+	public CandidateException( CandidateExceptionType type, Object object ) {
+
+	}
+
+	public CandidateException( CandidateExceptionType type ) {
+		
 	}
 }

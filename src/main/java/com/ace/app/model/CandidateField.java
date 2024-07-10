@@ -2,7 +2,7 @@ package com.ace.app.model;
 
 /**
  * @author Ogboru Jude
- * @version 23-May-2024
+ * @version 0.0.1-SNAPSHOT
  */
 public enum CandidateField {
 	// When no data is expected

@@ -25,7 +25,7 @@ import com.ace.app.service.CandidateService;
 
 /**
  * @author Ogboru Jude
- * @version 25-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Service
 @SuppressWarnings( "unused" )

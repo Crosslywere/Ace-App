@@ -7,7 +7,7 @@ import com.ace.app.dto.RegisterCandidateDTO;
 
 /**
  * @author Ogboru Jude
- * @version 22-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 public interface CandidateService {
 

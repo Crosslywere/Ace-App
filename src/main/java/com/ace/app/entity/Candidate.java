@@ -22,7 +22,7 @@ import lombok.Setter;
  * Candidate class represents a candidate that can write an exam.
  * 
  * @author Ogboru Jude
- * @version 22-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Getter
 @Setter

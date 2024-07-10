@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Controller for the dashboard on the server machine
  * @author Ogboru Jude
- * @version 21-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Controller
 public class DashboardController {

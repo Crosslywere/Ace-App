@@ -9,7 +9,7 @@ import com.ace.app.model.ExamState;
 
 /**
  * @author Ogboru Jude
- * @version 18-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, Long> {

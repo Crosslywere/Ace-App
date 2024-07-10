@@ -11,7 +11,7 @@ import com.ace.app.model.ExamState;
 
 /**
  * @author Ogboru Jude
- * @version 21-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 public interface ExamService {
 

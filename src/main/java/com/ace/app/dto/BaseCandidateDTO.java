@@ -4,6 +4,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @author Ogboru Jude
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 @Setter
 @EqualsAndHashCode( exclude = "field2" )

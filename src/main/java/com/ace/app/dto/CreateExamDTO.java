@@ -20,7 +20,7 @@ import lombok.Setter;
 
 /**
  * @author Ogboru Jude
- * @version 18-June-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Getter
 @Setter

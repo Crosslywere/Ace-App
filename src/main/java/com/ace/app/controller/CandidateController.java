@@ -17,7 +17,7 @@ import com.ace.app.service.ExamService;
 
 /**
  * @author Ogboru Jude
- * @version 08-July-2024
+ * @version 0.0.1-SNAPSHOT
  */
 @Controller
 public class CandidateController {
@@ -130,7 +130,7 @@ public class CandidateController {
 			candidate = candidateService.loginCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
 			switch ( e.getType() ) {
-				// TODO HAndle errors
+				// TODO Handle errors
 				case INVALID_CANDIDATE -> {
 					return "redirect:/exam/select";
 				}
