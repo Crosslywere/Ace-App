@@ -215,6 +215,7 @@ public class ExamServiceImpl implements ExamService {
 					for ( int i = 0; i < oldExam.getPapers().size(); i++ ) {
 						if ( oldExam.getPapers().get( i ).getName().equalsIgnoreCase( paper.getName() ) ) {
 							oldExam.getPapers().get( i ).append( paper.getQuestions() );
+							oldExam.getPapers().get( i ).setManditory( paper.getManditory() );
 							handled = true;
 							break;
 						}

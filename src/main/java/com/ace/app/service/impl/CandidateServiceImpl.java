@@ -99,6 +99,9 @@ public class CandidateServiceImpl implements CandidateService {
 					}
 				}
 				candidate.setHasLoggedIn( true );
+				candidate.getPapers().forEach( paper -> {
+					appendQuestions( candidate, paper );
+				} );
 				return candidateRepository.save( candidate );
 			}
 		} else {
@@ -112,5 +115,13 @@ public class CandidateServiceImpl implements CandidateService {
 			candidate.setHasLoggedIn( true );
 			return candidateRepository.save( candidate );
 		}
+	}
+
+	private void appendQuestions( Candidate candidate, Paper paper ) {
+		Random rand = new Random( candidate.getCandidateId().hashCode() );
+		Collections.shuffle( paper.getQuestions() );
+		paper.getQuestions().forEach( question -> {
+			System.out.println( question.getNumber() );
+		} );
 	}
 }

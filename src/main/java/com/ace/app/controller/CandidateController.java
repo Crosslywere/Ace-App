@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.ace.app.dto.ExamCandidateDTO;
 import com.ace.app.dto.RegisterCandidateDTO;
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
@@ -73,7 +74,7 @@ public class CandidateController {
 	 * @param candidateDTO
 	 * @param model
 	 * @param redirect
-	 * @return The template for selecting the papers for the candidate
+	 * @return The template for selecting the candidate's papers
 	 */
 	@PostMapping( "/exam/papers" )
 	public String examPapers( RegisterCandidateDTO candidateDTO, Model model, RedirectAttributes redirect ) {
@@ -117,7 +118,7 @@ public class CandidateController {
 	 * 
 	 * @param candidateDTO
 	 * @param model
-	 * @return
+	 * @return The preamble template
 	 */
 	@PostMapping( "/exam/validate" )
 	public String candidateValidate( RegisterCandidateDTO candidateDTO, Model model ) {
@@ -146,6 +147,25 @@ public class CandidateController {
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
 		}
+		model.addAttribute( "exam", exam );
+		model.addAttribute( "candidate", new ExamCandidateDTO( candidate ) );
 		return "candidate/exam-preamble";
+	}
+
+	/**
+	 * 
+	 * @param candidateDTO
+	 * @param model
+	 * @return The exam question template for the selected exam
+	 */
+	@PostMapping( "/exam/{paper}/{number}" )
+	public String getQuestion( ExamCandidateDTO candidateDTO, Model model ) {
+		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
+		if ( exam == null ) {
+			return "redirect:/exam/select";
+		}
+		model.addAttribute( "exam", exam );
+		model.addAttribute( "candidate", candidateDTO );
+		return "candidate/exam-question";
 	}
 }

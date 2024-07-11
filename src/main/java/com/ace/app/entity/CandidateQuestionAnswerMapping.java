@@ -33,5 +33,7 @@ public class CandidateQuestionAnswerMapping {
 	@ManyToOne
 	private Question question;
 
+	private Integer candidateQuestionNumber;
+
 	private Integer answerIndex;
 }

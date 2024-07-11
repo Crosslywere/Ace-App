@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,19 @@
 			width: 600px;
 			margin: 0 auto;
 		}
+		h2 {
+			font-size: 38px;
+			font-weight: 500;
+		}
+		p {
+			margin-bottom: 48px;
+		}
+		button {
+			margin-top: 48px;
+			border: none;
+			font-weight: 600;
+			padding: 22px;
+		}
 	</style>
 	<title>Start Exam</title>
 </head>
@@ -17,10 +30,15 @@
 	<div class="border-bottom flex-row align-center" style="padding:36px 72px 24px;">
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
 	</div>
-	<div class="container">
-		<!-- <form th:action="@{/exam/{paperName}/{questionNumber}(paperName=${candidate.paperName}, questionNumber=${candidate.questionNumber})}" th:object="${candidate}" method="post">
-			<button class="action-btn width-100 br-16" type="submit">Start</button>
-		</form> -->
-	</div>
+		<form  th:action="@{/exam/{paper}/1(paper=${candidate.papers[0].name})}" th:object="${candidate}" method="post" class="container">
+			<input type="number" th:field="*{examId}" hidden>
+			<input type="text" th:field="*{field1}" hidden>
+			<input type="text" th:field="*{field2}" hidden>
+			<h2 class="text-center" th:text="${exam.title}"></h2>
+			<p>Please read the following carefully.</p>
+			<p>This is an official exam. Therefore, no cross talking, passing of stationary, or activity that may be seen as malpractice would be tolorated.</p>
+			<p>The exam is timed. The timer is shown at the top right side of the screen as soon as you click "Begin".</p>
+			<button type="submit" class="action-btn width-100 br-16">Begin</button>
+		</form>
 </body>
 </html>
