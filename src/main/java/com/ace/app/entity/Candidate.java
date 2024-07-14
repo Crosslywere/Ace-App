@@ -7,6 +7,7 @@ import com.ace.app.dto.BaseCandidateDTO;
 import com.ace.app.dto.ModifyOCandidateDTO;
 import com.ace.app.model.CandidateId;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -49,8 +50,8 @@ public class Candidate {
 	@Column( nullable = false )
 	private Boolean submitted = false;
 
-	@OneToMany
-	private List<CandidateQuestionAnswerMapping> questionAnswerMapping;
+	@OneToMany( cascade = CascadeType.ALL, orphanRemoval = true )
+	private List<CandidateQuestionAnswerMapper> answerMapper;
 
 	public Candidate( BaseCandidateDTO candidateDTO, Exam exam ) {
 		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
