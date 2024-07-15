@@ -47,6 +47,9 @@
 				</tbody>
 			</table>
 		</div>
+		<div th:if="${errorMessage ne null}">
+			<p th:text="|* ${errorMessage}|" class="danger-text text-center"></p>
+		</div>
 		<button class="action-btn width-100 br-16" type="submit">Next</button>
 	</form>
 </body>
