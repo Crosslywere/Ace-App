@@ -26,7 +26,7 @@ public class ExamPaperDTO {
 	public ExamPaperDTO( Paper paper, Candidate candidate ) {
 		this.name = paper.getName();
 		this.questions = new ArrayList<>();
-		candidate.getQuestionAnswerMapping().forEach( questionAnswerMap -> {
+		candidate.getAnswerMapper().forEach( questionAnswerMap -> {
 			if ( questionAnswerMap.getQuestion().getPaper().getName().equals( name ) ) {
 				questions.add( new ExamQuestionDTO( questionAnswerMap ) );
 			}
