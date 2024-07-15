@@ -20,15 +20,19 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 
 	private Long examId;
 
-	private Float timeUsed;
+	private Float timeUsed = 0.0f;
 
-	private String paperName;
+	private String paperName = "";
 
-	private Integer questionNumber;
+	private Integer questionNumber = 1;
 
 	private String question;
 
 	private List<ExamPaperDTO> papers = new ArrayList<>();
+
+	private List<String> options;
+
+	private Integer answerIndex;
 	
 	public ExamCandidateDTO( Candidate candidate ) {
 		super();
@@ -42,7 +46,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		} );
 	}
 
-	public ExamCandidateDTO( Candidate candidate, String paperName, Integer questionNumber ) {
+	public ExamCandidateDTO( Candidate candidate, String paperName, Integer questionNumber, List<String> options, Integer answerIndex ) {
 		super();
 		super.field1 = candidate.getField1();
 		super.field2 = candidate.getField2();
@@ -50,6 +54,8 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		this.timeUsed = candidate.getTimeUsed();
 		this.paperName = paperName;
 		this.questionNumber = questionNumber;
+		this.options = options;
+		this.answerIndex= answerIndex;
 		this.papers = new ArrayList<>();
 		candidate.getPapers().forEach( paper -> {
 			papers.add( new ExamPaperDTO( paper, candidate ) );
