@@ -1,6 +1,6 @@
 package com.ace.app.dto;
 
-import com.ace.app.entity.CandidateQuestionAnswerMapping;
+import com.ace.app.entity.CandidateQuestionAnswerMapper;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,9 +17,9 @@ public class ExamQuestionDTO {
 
 	private Integer answerIndex;
 
-	public ExamQuestionDTO( CandidateQuestionAnswerMapping questionAnswerMap ) {
+	public ExamQuestionDTO( CandidateQuestionAnswerMapper questionAnswerMap ) {
 		this.refNumber = questionAnswerMap.getQuestion().getNumber();
-		this.number = questionAnswerMap.getCandidateQuestionNumber();
+		this.number = questionAnswerMap.getCandidateQuestionAnswerId().getCandidateQuestionNumber();
 		this.answerIndex = questionAnswerMap.getAnswerIndex();
 	}
 }
