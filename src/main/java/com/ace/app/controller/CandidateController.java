@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ace.app.dto.ExamCandidateDTO;
 import com.ace.app.dto.RegisterCandidateDTO;
@@ -77,7 +77,7 @@ public class CandidateController {
 	 * @return The template for selecting the candidate's papers
 	 */
 	@PostMapping( "/exam/papers" )
-	public String examPapers( RegisterCandidateDTO candidateDTO, Model model, RedirectAttributes redirect ) {
+	public String examPapers( RegisterCandidateDTO candidateDTO, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
 			return "redirect:/exam/select";
@@ -87,11 +87,22 @@ public class CandidateController {
 			candidate = candidateService.putCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
 			switch ( e.getType() ) {
+				case INVALID_CANDIDATE -> {
+					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
+						candidateDTO = ( RegisterCandidateDTO )e.getObject();
+						model.addAttribute( "errorMessage", e.getMessage() );
+						return examLogin( candidateDTO, model );
+					} else {
+						return "redirect:/exam/select";
+					}
+				}
 				case INVALID_CREDENTIALS -> {
 					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
 						candidateDTO = ( RegisterCandidateDTO )e.getObject();
 						model.addAttribute( "errorMessage", e.getMessage() );
 						return examLogin( candidateDTO, model );
+					} else {
+						return "redirect:/exam/select";
 					}
 				}
 				default -> {
@@ -103,9 +114,7 @@ public class CandidateController {
 			return "redirect:/exam/select";
 		}
 		if ( candidate.getPapers().size() == exam.getPapersPerCandidate() ) {
-			// TODO Create CandidateDTO for the purpose of preamble
-			model.addAttribute( "candidate", null );
-			return "candidate/exam-preamble";
+			return candidateValidate( candidateDTO, model );
 		} else {
 			candidateDTO = new RegisterCandidateDTO( candidate );
 			model.addAttribute( "candidate", candidateDTO );
@@ -136,10 +145,24 @@ public class CandidateController {
 					return "redirect:/exam/select";
 				}
 				case INVALID_CREDENTIALS -> {
-					return "redirect:/exam/select";
+					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
+						candidateDTO = ( RegisterCandidateDTO )e.getObject();
+						model.addAttribute( "errorMessage", e.getMessage() );
+						return examLogin( candidateDTO, model );
+					} else {
+						return "redirect:/exam/select";
+					}
+				}
+				case INVALID_PAPER_COUNT -> {
+					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
+						candidateDTO = ( RegisterCandidateDTO )e.getObject();
+						model.addAttribute( "errorMessage", e.getMessage() );
+						return examPapers( candidateDTO, model );
+					} else {
+						return "redirect:/exam/select";
+					}
 				}
 				default -> {
-					System.out.println( e.getMessage() );
 					return "redirect:/exam/select";
 				}
 			}
@@ -159,13 +182,27 @@ public class CandidateController {
 	 * @return The exam question template for the selected exam
 	 */
 	@PostMapping( "/exam/{paper}/{number}" )
-	public String getQuestion( ExamCandidateDTO candidateDTO, Model model ) {
+	public String getQuestion( @PathVariable( "paper" ) String paperName, @PathVariable( "number" ) Integer number, ExamCandidateDTO candidateDTO, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null ) {
 			return "redirect:/exam/select";
 		}
+		try {
+			candidateDTO = candidateService.submitQuestion( candidateDTO, paperName, number );
+		} catch ( CandidateException e ) {
+			switch ( e.getType() ) {
+				default -> {
+					return "redirect:/exam/select";
+				}
+			}
+		}
 		model.addAttribute( "exam", exam );
 		model.addAttribute( "candidate", candidateDTO );
+		return "candidate/exam-question";
+	}
+
+	@GetMapping( "/exam/{paper}/1" )
+	public String getQuestion( @PathVariable( "paper" ) String paper, ExamCandidateDTO candidateDTO, Model model ) {
 		return "candidate/exam-question";
 	}
 }
