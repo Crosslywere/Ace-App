@@ -11,7 +11,7 @@
 			margin: 130px auto 0;
 		}
 	</style>
-	<title th:text="${exam.title}"></title>
+	<title th:text="|${exam.title} - ${candidate.paperName}|"></title>
 </head>
 <body>
 	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
@@ -20,11 +20,49 @@
 	</div>
 	<div class="flex-row">
 		<form th:action="@{/exam/{paper}/{number}(paper=${candidate.paperName}, number=${candidate.questionNumber})}" th:object="${candidate}" method="post">
-
+			<input type="number" th:field="*{examId}" hidden>
+			<input type="text" th:field="*{field1}" hidden>
+			<input type="text" th:field="*{field2}" hidden>
+			<input type="number" th:field="*{questionNumber}" hidden>
+			<div class="width-100 flex-row align-end"> <!-- th:with="nextNumber=${}"> -->
+				<button type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{paper}/{number}(paper=*{paperName},number=*{questionNumber - 1})}" th:disable=""><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
+				<h2 th:text="*{exam.title}" style="display:inline-block;margin:0 auto;"></h2>
+				<button type="submit" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="${next == 'submit' ? 'Submit' : 'Next'}">Next</button>
+			</div>
 		</form>
 	</div>
 	<script>
-
+		document.onkeydown = (ev) => {
+			if (ev.key == "ArrowLeft") {
+				console.log("getting next question")
+			}
+			if (ev.key == "ArrowRight") {
+				console.log("getting previous question")
+			}
+			if (ev.key == "ArrowDown") {
+				console.log("getting next paper")
+			}
+			if (ev.key == "ArrowUp") {
+				console.log("getting previous paper")
+			}
+		}
+		document.onkeypress = (ev) => {
+			if (ev.key == "1") {
+				console.log("A")
+			}
+			if (ev.key == "2") {
+				console.log("B")
+			}
+			if (ev.key == "3") {
+				console.log("C")
+			}
+			if (ev.key == "4") {
+				console.log("D")
+			}
+			if (ev.key == "5") {
+				console.log("E")
+			}
+		}
 	</script>
 </body>
 </html>
