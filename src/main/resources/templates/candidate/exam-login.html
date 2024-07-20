@@ -54,7 +54,9 @@
 		<label th:unless="${field2.name == 'None'}" style="position:relative">
 			<th:block th:text="${field2Desc}"></th:block>
 			<input th:type="${field2.type}" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
-			<button th:if="${field2.name == 'Passowrd'}" id="show-password">Show</button>
+			<th:block th:if="${field2.name == 'Password'}">
+				<button id="password-toggle" class="action-btn" style="position:absolute;top:-4px;right:12px;padding:8px;border-radius:4px;">show</button>
+			</th:block>
 		</label>
 		<div th:if="${errorMessage ne null}">
 			<p th:text="|* ${errorMessage}|" class="danger-text text-center"></p>
@@ -62,17 +64,17 @@
 		<button type="submit" class="action-btn width-100 br-16">Login</button>
 	</form>
 	<script>
-		showPasswordBtn = document.getElementById('show-password');
+		showPasswordBtn = document.getElementById('password-toggle');
 		if (showPasswordBtn != null) {
 			showPasswordBtn.onclick = (ev) => {
 				ev.preventDefault();
 				password = document.getElementById('field2');
 				if (password.type == "password") {
 					password.type = "text";
-					showPasswordBtn.innerHTML = "Hide";
+					showPasswordBtn.innerHTML = "hide";
 				} else {
 					password.type = "password";
-					showPasswordBtn.innerHTML = "Show";
+					showPasswordBtn.innerHTML = "show";
 				}
 			}
 		}
