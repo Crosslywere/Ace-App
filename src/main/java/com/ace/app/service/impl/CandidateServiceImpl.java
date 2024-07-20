@@ -115,7 +115,7 @@ public class CandidateServiceImpl implements CandidateService {
 					if ( paper.getManditory() ) {
 						if ( !candidate.getPapers().contains( paper ) ) {
 							// Return exam paper select page
-							throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_COUNT, candidateDTO );
+							throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_SELECTED, candidateDTO );
 						}
 					}
 				}
@@ -130,7 +130,7 @@ public class CandidateServiceImpl implements CandidateService {
 				if ( paper.getManditory() ) {
 					if ( !candidate.getPapers().contains( paper ) ) {
 						// Return exam paper select page
-						throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_COUNT, candidateDTO );
+						throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionType.INVALID_PAPER_SELECTED, candidateDTO );
 					}
 				}
 			}

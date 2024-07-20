@@ -112,11 +112,11 @@ public class CandidateController {
 		}
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
-		}
-		if ( candidate.getPapers().size() == exam.getPapersPerCandidate() ) {
-			return candidateValidate( candidateDTO, model );
 		} else {
 			candidateDTO = new RegisterCandidateDTO( candidate );
+			if ( candidateDTO.getPaperNames().size() == exam.getPapersPerCandidate() ) {
+				return candidateValidate( candidateDTO, model );
+			}
 			model.addAttribute( "candidate", candidateDTO );
 			model.addAttribute( "exam", exam );
 			return "candidate/exam-papers";
@@ -162,6 +162,17 @@ public class CandidateController {
 						return "redirect:/exam/select";
 					}
 				}
+				case INVALID_PAPER_SELECTED -> {
+					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
+						candidateDTO = ( RegisterCandidateDTO )e.getObject();
+						model.addAttribute( "errorMessage", e.getMessage() );
+						model.addAttribute( "candidate", candidateDTO );
+						model.addAttribute( "exam", exam );
+						return "candidate/exam-papers";
+					} else {
+						return "redirect:/exam/select";
+					}
+				}
 				default -> {
 					return "redirect:/exam/select";
 				}
@@ -192,6 +203,7 @@ public class CandidateController {
 		} catch ( CandidateException e ) {
 			switch ( e.getType() ) {
 				default -> {
+					System.out.println( e.getMessage() );
 					return "redirect:/exam/select";
 				}
 			}
