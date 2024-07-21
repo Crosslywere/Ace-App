@@ -202,8 +202,8 @@ public class CandidateController {
 			candidateDTO = candidateService.submitQuestion( candidateDTO, paperName, number );
 		} catch ( CandidateException e ) {
 			switch ( e.getType() ) {
+				// TODO handle cases
 				default -> {
-					System.out.println( e.getMessage() );
 					return "redirect:/exam/select";
 				}
 			}

@@ -8,7 +8,12 @@
 	<style>
 		.container {
 			width: 1160px;
-			margin: 130px auto 0;
+			margin:130px auto 0;
+		}
+		h2 {
+			display: inline-block;
+			font-size: 38px;
+			font-weight: 500;
 		}
 	</style>
 	<title th:text="|${exam.title} - ${candidate.paperName}|"></title>
@@ -19,14 +24,14 @@
 		<span id="timer"></span>
 	</div>
 	<div class="flex-row">
-		<form th:action="@{/exam/{paper}/{number}(paper=${candidate.paperName}, number=${candidate.questionNumber})}" th:object="${candidate}" method="post">
+		<form th:action="@{/exam/{paper}/{number}(paper=${candidate.paperName}, number=${candidate.questionNumber + 1})}" th:object="${candidate}" method="post" class="container">
 			<input type="number" th:field="*{examId}" hidden>
 			<input type="text" th:field="*{field1}" hidden>
 			<input type="text" th:field="*{field2}" hidden>
 			<input type="number" th:field="*{questionNumber}" hidden>
-			<div class="width-100 flex-row align-end"> <!-- th:with="nextNumber=${}"> -->
-				<button type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{paper}/{number}(paper=*{paperName},number=*{questionNumber - 1})}" th:disable=""><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
-				<h2 th:text="*{exam.title}" style="display:inline-block;margin:0 auto;"></h2>
+			<div class="width-100 flex-row align-center">
+				<button type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{paper}/{number}(paper=*{paperName},number=*{questionNumber - 1})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
+				<h2 th:text="${exam.title}" style="display:inline-block;margin:0 auto;"></h2>
 				<button type="submit" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="${next == 'submit' ? 'Submit' : 'Next'}">Next</button>
 			</div>
 		</form>

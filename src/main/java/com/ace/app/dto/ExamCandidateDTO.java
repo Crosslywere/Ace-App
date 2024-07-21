@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ace.app.entity.Candidate;
+import com.ace.app.entity.CandidateQuestionAnswerMapper;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,10 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 	private List<String> options;
 
 	private Integer answerIndex;
+
+	private String next = null;
+
+	private String prev = null;
 	
 	public ExamCandidateDTO( Candidate candidate ) {
 		super();
@@ -53,6 +58,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		this.examId = candidate.getExam().getExamId();
 		this.timeUsed = candidate.getTimeUsed();
 		this.paperName = paperName;
+		this.question = "";
 		this.questionNumber = questionNumber;
 		this.options = options;
 		this.answerIndex= answerIndex;
@@ -60,5 +66,23 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		candidate.getPapers().forEach( paper -> {
 			papers.add( new ExamPaperDTO( paper, candidate ) );
 		} );
+	}
+
+	public ExamCandidateDTO( Candidate candidate, CandidateQuestionAnswerMapper questionMap ) {
+		super();
+		super.field1 = candidate.getField1();
+		super.field2 = candidate.getField2();
+		this.examId = candidate.getExam().getExamId();
+		this.timeUsed = candidate.getTimeUsed();
+		this.paperName = questionMap.getPaper().getName();
+		this.question = questionMap.getQuestion().getQuestion();
+		this.questionNumber = questionMap.getCandidateQuestionNumber();
+		this.options = questionMap.getQuestion().getOptions();
+		this.answerIndex = questionMap.getAnswerIndex();
+		this.papers = new ArrayList<>();
+		candidate.getPapers().forEach( paper -> {
+			papers.add( new ExamPaperDTO( paper, candidate ) );
+		} );
+		next = paperName + "/" + ( ( Integer )( questionNumber + 1 ) ).toString();
 	}
 }
