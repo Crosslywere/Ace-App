@@ -159,15 +159,13 @@ public class CandidateServiceImpl implements CandidateService {
 			// Return error page
 			throw new CandidateException( "Invalid candidate", CandidateExceptionType.INVALID_CREDENTIALS, null );
 		}
-		if ( candidateDTO.getPaperName() != null && candidateDTO.getQuestionNumber() != null ) {
-			Paper paper = paperRepository.findById( new PaperId( exam, candidateDTO.getPaperName() ) ).orElse( null );
-			CandidateQuestionAnswerMapper mapper = candidateQuestionAnswerMapperRepository.findById( new CandidateQuestionAnswerMapperId( candidateDTO.getQuestionNumber(), candidate, paper ) ).orElse( null );
-			if ( mapper == null ) {
-				// Return error page
-				throw new CandidateException( "Invalid question", CandidateExceptionType.INVALID_QUESTION, null );
-			} else {
-				mapper.setAnswerIndex( candidateDTO.getAnswerIndex() );
-			}
+		// TODO Save the question answer before getting the next question
+
+		// Getting the next question
+		Paper paper = paperRepository.findById( new PaperId( exam, paperName ) ).orElse( null );
+		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( new CandidateQuestionAnswerMapperId( number, candidate, paper ) ).orElse( null );
+		if ( map != null ) {
+			return new ExamCandidateDTO( candidate, paperName, number, map.getQuestion().getOptions(), map.getAnswerIndex() );
 		}
 		return new ExamCandidateDTO( candidate, paperName, number, null, null );
 	}
