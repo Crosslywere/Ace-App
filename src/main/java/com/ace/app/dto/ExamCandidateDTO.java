@@ -1,88 +1,100 @@
 package com.ace.app.dto;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.CandidateQuestionAnswerMapper;
+import com.ace.app.entity.Exam;
+import com.ace.app.entity.Paper;
+import com.ace.app.model.CandidateId;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * @author Ogboru Jude
- * @version 0.0.1-SNAPSHOT
- */
 @Getter
 @Setter
 @NoArgsConstructor
 public class ExamCandidateDTO extends BaseCandidateDTO {
 
-	private Long examId;
+	private Long examId = 0L;
+
+	private String currentPaperName = "";
+	private Integer currentPaperQuestionNumber = 0;
+	private Integer currentPaperQuestionOptionIndex = null;
+
+	private String currentQuestionStr = "";
+	private List<String> currentOptions = new ArrayList<>();
+	private Integer currentAnswerIndex = null;
+
+	private List<String> paperNames = new ArrayList<>();
+	private Map<Integer, Boolean> currentPaperQuestionsAnswered = new LinkedHashMap<>();
+
+	private String nextQuestionPath = null;
+	private String prevQuestionPath = null;
 
 	private Float timeUsed = 0.0f;
 
-	private String paperName = "";
-
-	private Integer questionNumber = 1;
-
-	private String question;
-
-	private List<ExamPaperDTO> papers = new ArrayList<>();
-
-	private List<String> options;
-
-	private Integer answerIndex;
-
-	private String next = null;
-
-	private String prev = null;
-	
 	public ExamCandidateDTO( Candidate candidate ) {
-		super();
-		super.field1 = candidate.getField1();
-		super.field2 = candidate.getField2();
-		this.examId = candidate.getExam().getExamId();
-		this.timeUsed = candidate.getTimeUsed();
-		this.papers = new ArrayList<>();
+		examId = candidate.getExam().getExamId();
+		field1 = candidate.getField1();
+		field2 = candidate.getField2();
+
+		paperNames = new ArrayList<>();
 		candidate.getPapers().forEach( paper -> {
-			papers.add( new ExamPaperDTO( paper, candidate ) );
+			paperNames.add( paper.getName() );
 		} );
 	}
 
-	public ExamCandidateDTO( Candidate candidate, String paperName, Integer questionNumber, List<String> options, Integer answerIndex ) {
-		super();
-		super.field1 = candidate.getField1();
-		super.field2 = candidate.getField2();
-		this.examId = candidate.getExam().getExamId();
-		this.timeUsed = candidate.getTimeUsed();
-		this.paperName = paperName;
-		this.question = "";
-		this.questionNumber = questionNumber;
-		this.options = options;
-		this.answerIndex= answerIndex;
-		this.papers = new ArrayList<>();
+	public ExamCandidateDTO( Candidate candidate, CandidateQuestionAnswerMapper currentMap ) {
+		examId = candidate.getExam().getExamId();
+		field1 = candidate.getField1();
+		field2 = candidate.getField2();
+
+		currentPaperName = currentMap.getPaper().getName();
+		currentPaperQuestionNumber = currentMap.getCandidateQuestionNumber();
+		currentPaperQuestionOptionIndex = currentMap.getAnswerIndex();
+
+		currentQuestionStr = currentMap.getQuestion().getQuestion();
+		currentOptions = currentMap.getQuestion().getOptions();
+		currentAnswerIndex = currentMap.getAnswerIndex();
+
+		paperNames = new ArrayList<>();
 		candidate.getPapers().forEach( paper -> {
-			papers.add( new ExamPaperDTO( paper, candidate ) );
+			paperNames.add( paper.getName() );
 		} );
+		currentPaperQuestionsAnswered = new LinkedHashMap<>();
+		candidate.getAnswerMapper().forEach( map -> {
+			if ( currentPaperName == map.getPaper().getName() ) {
+				currentPaperQuestionsAnswered.put( map.getCandidateQuestionNumber(), map.getAnswerIndex() != null );
+			}
+		} );
+
+		// TODO Validate the paths
+		int currentPaperIndex = paperNames.indexOf( currentPaperName );
+		Paper currentPaper = candidate.getPapers().get( currentPaperIndex );
+		if ( currentPaperIndex == 0 && currentPaperQuestionNumber == 1 ) {
+			prevQuestionPath = null;
+		} else if ( currentPaperIndex > 0 && currentPaperQuestionNumber == 1 ) {
+			prevQuestionPath = paperNames.get( currentPaperIndex - 1 ) + "/" + currentPaper.getQuestionsPerCandidate();
+		} else {
+			prevQuestionPath = currentPaperName + "/" + ( currentPaperQuestionNumber - 1 );
+		}
+		if ( currentPaperIndex == paperNames.size() - 1 && currentPaperQuestionNumber == currentPaper.getQuestionsPerCandidate() ) {
+			nextQuestionPath = null;
+		} else if ( currentPaperIndex < paperNames.size() - 1 && currentPaperQuestionNumber == currentPaper.getQuestionsPerCandidate() ) {
+			nextQuestionPath = paperNames.get( currentPaperIndex + 1 ) + "/1";
+		} else {
+			nextQuestionPath = currentPaperName + "/" + ( currentPaperQuestionNumber + 1 );
+		}
+
+		timeUsed = candidate.getTimeUsed();
 	}
 
-	public ExamCandidateDTO( Candidate candidate, CandidateQuestionAnswerMapper questionMap ) {
-		super();
-		super.field1 = candidate.getField1();
-		super.field2 = candidate.getField2();
-		this.examId = candidate.getExam().getExamId();
-		this.timeUsed = candidate.getTimeUsed();
-		this.paperName = questionMap.getPaper().getName();
-		this.question = questionMap.getQuestion().getQuestion();
-		this.questionNumber = questionMap.getCandidateQuestionNumber();
-		this.options = questionMap.getQuestion().getOptions();
-		this.answerIndex = questionMap.getAnswerIndex();
-		this.papers = new ArrayList<>();
-		candidate.getPapers().forEach( paper -> {
-			papers.add( new ExamPaperDTO( paper, candidate ) );
-		} );
-		next = paperName + "/" + ( ( Integer )( questionNumber + 1 ) ).toString();
+	public CandidateId getCandidateId( Exam exam ) {
+		return new CandidateId( exam, field1, field2 );
 	}
 }

@@ -16,58 +16,34 @@
 			font-weight: 500;
 		}
 	</style>
-	<title th:text="|${exam.title} - ${candidate.paperName}|"></title>
+	<title th:text="|${exam.title} - ${candidate.currentPaperName}|"></title>
 </head>
 <body>
 	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
-		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
-		<span id="timer"></span>
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a><section><span id="timer"></span> / <span id="duration" th:text="${exam.duration}"></span></section>
 	</div>
-	<div class="flex-row">
-		<form th:action="@{/exam/{paper}/{number}(paper=${candidate.paperName}, number=${candidate.questionNumber + 1})}" th:object="${candidate}" method="post" class="container">
-			<input type="number" th:field="*{examId}" hidden>
-			<input type="text" th:field="*{field1}" hidden>
-			<input type="text" th:field="*{field2}" hidden>
-			<input type="number" th:field="*{questionNumber}" hidden>
-			<div class="width-100 flex-row align-center">
-				<button type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{paper}/{number}(paper=*{paperName},number=*{questionNumber - 1})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
-				<h2 th:text="${exam.title}" style="display:inline-block;margin:0 auto;"></h2>
-				<button type="submit" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="${next == 'submit' ? 'Submit' : 'Next'}">Next</button>
-			</div>
-		</form>
-	</div>
+	<form th:action="@{exam/{next}(next=${candidate.nextQuestionPath})}" th:object="${candidate}" method="post" class="container">
+		<input type="number" th:field="*{examId}" hidden>
+		<input type="text" th:field="*{field1}" hidden>
+		<input type="text" th:field="*{field2}" hidden>
+		<input type="number" th:field="*{currentPaperQuestionNumber}" hidden>
+		<div class="width-100 flex-row align-center">
+			<button th:if="*{prevQuestionPath != null}" type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=${prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
+			<h2 th:text="|${exam.title} - *{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
+			<button th:if="*{nextQuestionPath != null}" type="submit" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;">Next</button>
+		</div>
+	</form>
 	<script>
-		document.onkeydown = (ev) => {
-			if (ev.key == "ArrowLeft") {
-				console.log("getting next question")
-			}
-			if (ev.key == "ArrowRight") {
-				console.log("getting previous question")
-			}
-			if (ev.key == "ArrowDown") {
-				console.log("getting next paper")
-			}
-			if (ev.key == "ArrowUp") {
-				console.log("getting previous paper")
-			}
+		function timeWriter(t) {
+			var h = Math.floor(t % (60 * 60 * 24) / (60 * 60));
+			var m = Math.floor(t % (60 * 60) / 60);
+			var s = Math.floor(t % 60);
+			return (h >= 10 ? h : '0' + h) + ':' + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s);
 		}
-		document.onkeypress = (ev) => {
-			if (ev.key == "1") {
-				console.log("A")
-			}
-			if (ev.key == "2") {
-				console.log("B")
-			}
-			if (ev.key == "3") {
-				console.log("C")
-			}
-			if (ev.key == "4") {
-				console.log("D")
-			}
-			if (ev.key == "5") {
-				console.log("E")
-			}
-		}
+		const examDuration = document.getElementById("duration");
+		const timeAllowed = parseInt(duration.innerHTML) * 60;
+		const timeUsed = document.getElementById("timeUsed");
+		examDuration.innerHTML = timeWriter(timeAllowed);
 	</script>
 </body>
 </html>
