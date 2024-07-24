@@ -142,32 +142,52 @@ public class CandidateServiceImpl implements CandidateService {
 		}
 	}
 
-	@Override
-	public ExamCandidateDTO submitQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer number ) throws CandidateException {
-		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
-			// Return exam select page
+	public ExamCandidateDTO submitQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException {
+		if ( candidateDTO == null ) {
 			throw new CandidateException( "Invalid candidate", CandidateExceptionType.INVALID_CANDIDATE, null );
 		}
 		Exam exam = examRepository.findById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
-			// Return exam select page
 			throw new CandidateException( "Invalid exam", CandidateExceptionType.INVALID_EXAM, null );
 		}
-		CandidateId candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() );
-		Candidate candidate = candidateRepository.findById( candidateId ).orElse( null );
+		Candidate candidate = candidateRepository.findById( candidateDTO.getCandidateId( exam ) ).orElse( null );
 		if ( candidate == null ) {
-			// Return error page
-			throw new CandidateException( "Invalid candidate", CandidateExceptionType.INVALID_CREDENTIALS, null );
+			// TODO throw exception
+			throw new CandidateException( "Invalid candidate", CandidateExceptionType.INVALID_CANDIDATE, null );
 		}
-		// TODO Save the question answer before getting the next question
-
-		// Getting the next question
-		Paper paper = paperRepository.findById( new PaperId( exam, paperName ) ).orElse( null );
-		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( new CandidateQuestionAnswerMapperId( number, candidate, paper ) ).orElse( null );
-		if ( map != null ) {
-			return new ExamCandidateDTO( candidate, paperName, number, map.getQuestion().getOptions(), map.getAnswerIndex() );
+		if ( candidateDTO.getTimeUsed() != null ) {
+			candidate.setTimeUsed( candidateDTO.getTimeUsed() );
+			if ( candidate.getTimeUsed() >= exam.getDuration() ) {
+				candidate.setSubmitted( true );
+			}
+			candidateRepository.save( candidate );
+			Paper paper = paperRepository.findById( new PaperId( exam, candidateDTO.getCurrentPaperName() ) ).orElse( null );
+			if ( paper != null ) {
+				CandidateQuestionAnswerMapperId mapId = new CandidateQuestionAnswerMapperId( candidateDTO.getCurrentPaperQuestionNumber(), candidate, paper );
+				CandidateQuestionAnswerMapper answeredMap = candidateQuestionAnswerMapperRepository.findById( mapId ).orElse( null );
+				if ( answeredMap != null ) {
+					answeredMap.setAnswerIndex( candidateDTO.getCurrentAnswerIndex() );
+					candidateQuestionAnswerMapperRepository.save( answeredMap );
+				}
+			}
 		}
-		return new ExamCandidateDTO( candidate, paperName, number, null, null );
+		if ( candidate.getTimeUsed() >= exam.getDuration() ) {
+			// Return submitted page
+			throw new CandidateException( "", null, null );
+		}
+		PaperId paperId = new PaperId( exam, paperName );
+		Paper paper = paperRepository.findById( paperId ).orElse( null );
+		if ( paper == null ) {
+			// Paper doesn't exist
+			throw new CandidateException( "", CandidateExceptionType.INVALID_PAPER_SELECTED, null );
+		}
+		CandidateQuestionAnswerMapperId mapId = new CandidateQuestionAnswerMapperId( questionNumber, candidate, paper );
+		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( mapId ).orElse( null );
+		if ( map == null ) {
+			// TODO throw exception
+			throw new CandidateException( "", null, null );
+		}
+		return new ExamCandidateDTO( candidate, map );
 	}
 
 	private void appendQuestions( Candidate candidate, Paper paper ) {
