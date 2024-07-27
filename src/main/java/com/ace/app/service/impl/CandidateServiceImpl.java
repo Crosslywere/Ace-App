@@ -157,6 +157,7 @@ public class CandidateServiceImpl implements CandidateService {
 		}
 		if ( candidateDTO.getTimeUsed() != null ) {
 			candidate.setTimeUsed( candidateDTO.getTimeUsed() );
+			candidate.setHasLoggedIn( true );
 			if ( candidate.getTimeUsed() >= exam.getDuration() ) {
 				candidate.setSubmitted( true );
 			}
@@ -166,37 +167,39 @@ public class CandidateServiceImpl implements CandidateService {
 				CandidateQuestionAnswerMapperId mapId = new CandidateQuestionAnswerMapperId( candidateDTO.getCurrentPaperQuestionNumber(), candidate, paper );
 				CandidateQuestionAnswerMapper answeredMap = candidateQuestionAnswerMapperRepository.findById( mapId ).orElse( null );
 				if ( answeredMap != null ) {
+					// TODO Fix saving the answer
 					answeredMap.setAnswerIndex( candidateDTO.getCurrentAnswerIndex() );
+					// int i = candidate.getAnswerMapper().indexOf( answeredMap );
+					// candidate.getAnswerMapper().set( i, answeredMap );
 					candidateQuestionAnswerMapperRepository.save( answeredMap );
+					// candidateRepository.save( candidate );
 				}
 			}
 		}
-		if ( candidate.getTimeUsed() >= exam.getDuration() ) {
+		if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
 			// Return submitted page
-			throw new CandidateException( "", null, null );
+			throw new CandidateException( "Time concluded", CandidateExceptionType.TIME_CONCLUDED, null );
 		}
 		PaperId paperId = new PaperId( exam, paperName );
 		Paper paper = paperRepository.findById( paperId ).orElse( null );
 		if ( paper == null ) {
 			// Paper doesn't exist
-			throw new CandidateException( "", CandidateExceptionType.INVALID_PAPER_SELECTED, null );
+			throw new CandidateException( "Invalid paper", CandidateExceptionType.INVALID_PAPER_SELECTED, null );
 		}
 		CandidateQuestionAnswerMapperId mapId = new CandidateQuestionAnswerMapperId( questionNumber, candidate, paper );
 		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( mapId ).orElse( null );
 		if ( map == null ) {
-			// TODO throw exception
-			throw new CandidateException( "", null, null );
+			// Return error page
+			throw new CandidateException( "Invalid question", CandidateExceptionType.INVALID_QUESTION, null );
 		}
 		return new ExamCandidateDTO( candidate, map );
 	}
 
 	private void appendQuestions( Candidate candidate, Paper paper ) {
-		Random rand = new Random( candidate.getCandidateId().hashCode() );
+		Random rand = new Random( candidate.getCandidateId().hashCode() + paper.getPaperId().hashCode() );
 		Collections.shuffle( paper.getQuestions(), rand );
 		if ( candidate.getAnswerMapper() == null ) {
 			candidate.setAnswerMapper( new ArrayList<>() );
-		} else {
-			candidate.getAnswerMapper().clear();
 		}
 		for ( int i = 0; i < paper.getQuestionsPerCandidate(); i++ ) {
 			candidate.getAnswerMapper().add( new CandidateQuestionAnswerMapper(  i + 1, candidate, paper.getQuestions().get( i ) ) );
