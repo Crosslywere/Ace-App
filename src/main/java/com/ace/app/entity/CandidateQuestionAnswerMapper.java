@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,7 @@ import lombok.Setter;
 @Table( name = "candidate_question_answer_mapper" )
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode( exclude = "answerIndex" )
 public class CandidateQuestionAnswerMapper {
 
 	@EmbeddedId
