@@ -15,35 +15,154 @@
 			font-size: 38px;
 			font-weight: 500;
 		}
+		p {
+			padding: 0 50px;
+			margin-top: 48px;
+			margin-bottom: 50px;
+		}
+		#question-select {
+			flex-wrap:wrap;
+			padding:0 94px;
+			margin-top: 88px;
+		}
+		#question-select > * {
+			flex: 0.05;
+			height: 44px;
+			min-width: 48px;
+		}
 	</style>
 	<title th:text="|${exam.title} - ${candidate.currentPaperName}|"></title>
 </head>
 <body>
 	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
-		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a><section><span id="timer"></span> / <span id="duration" th:text="${exam.duration}"></span></section>
+		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a><section><span id="timer"></span>/<span id="duration" th:text="${exam.duration}"></span></section>
 	</div>
-	<form th:action="@{exam/{next}(next=${candidate.nextQuestionPath})}" th:object="${candidate}" method="post" class="container">
+	<form th:action="@{/exam/{next}(next=${candidate.nextQuestionPath})}" th:object="${candidate}" method="post" class="container">
 		<input type="number" th:field="*{examId}" hidden>
 		<input type="text" th:field="*{field1}" hidden>
 		<input type="text" th:field="*{field2}" hidden>
 		<input type="number" th:field="*{currentPaperQuestionNumber}" hidden>
+		<input type="number" th:field="*{timeUsed}" hidden>
 		<div class="width-100 flex-row align-center">
-			<button th:if="*{prevQuestionPath != null}" type="submit" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=${prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
-			<h2 th:text="|${exam.title} - *{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
-			<button th:if="*{nextQuestionPath != null}" type="submit" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;">Next</button>
+			<button th:if="*{prevQuestionPath != null}" type="submit" id="prev-question" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
+			<h2 th:text="|*{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
+			<button th:if="*{nextQuestionPath != null}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;">Next</button>
+		</div>
+		<p th:text="|*{currentPaperQuestionNumber}. *{currentQuestionStr}|"></p>
+		<th:block th:each="option : *{currentOptions}">
+			<div style="margin-bottom:16px;padding:0 66px">
+				<label>
+					<input type="radio" th:field="*{currentAnswerIndex}" th:value="${option}">
+					<span th:text="${option}"></span>
+				</label>
+			</div>
+		</th:block>
+		<div id="question-select" class="flex-row">
+			<button type="submit"
+			th:each="map : *{currentPaperQuestionsAnswered}"
+			th:with="i=${map.key}, currNum=*{currentPaperQuestionNumber}"
+			th:class="|${currNum == i ? 'current' : map.value ? 'answered' : ''} none-btn border|"
+			th:formaction="@{/exam/{paperName}/{questionNumber}(paperName=*{currentPaperName},questionNumber=${i})}"
+			th:text="|Q${i}|">Q1</button>
+		</div>
+		<div class="papers">
+			<th:block th:each="paper : *{paperNames}" th:with="currentPaper=*{currentPaperName}">
+				<button th:formaction="@{/exam/{paperName}/1(paperName=${paper})}" th:aria-current="${currentPaper == paper ? 'true' : ''}" th:text="${paper}" class="exam-paper">Paper</button>
+			</th:block>
 		</div>
 	</form>
 	<script>
+		// Count down timer
+		const timeUsed = document.getElementById("timeUsed");
+		const timeSlot = document.getElementById("timer");
+		const duration = document.getElementById("duration");
+		const timeAllowed = parseInt(duration.innerHTML) * 60;
 		function timeWriter(t) {
 			var h = Math.floor(t % (60 * 60 * 24) / (60 * 60));
 			var m = Math.floor(t % (60 * 60) / 60);
 			var s = Math.floor(t % 60);
-			return (h >= 10 ? h : '0' + h) + ':' + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s);
+			return h + ':' + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s);
 		}
-		const examDuration = document.getElementById("duration");
-		const timeAllowed = parseInt(duration.innerHTML) * 60;
-		const timeUsed = document.getElementById("timeUsed");
-		examDuration.innerHTML = timeWriter(timeAllowed);
+		function startTimer() {
+			duration.innerHTML = timeWriter(timeAllowed);
+			var t = parseFloat(timeUsed.value);
+			timeSlot.innerHTML = timeWriter(timeAllowed - t);
+			var interval = setInterval(() => {
+				t = parseFloat(timeUsed.value);
+				t += 0.1;
+				var timeRemaining = timeAllowed - t;
+				timeSlot.innerHTML = timeWriter(timeRemaining);
+				timeUsed.setAttribute("value", t);
+				if (timeUsed.value >= timeAllowed) {
+					clearInterval(interval);
+					document.querySelector("form").submit();
+				}
+			}, 100);
+		}
+		startTimer();
+		// Keyboard controls
+		const nextQuestion = document.getElementById('next-question');
+		const prevQuestion = document.getElementById('prev-question');
+		const papers = document.getElementsByClassName('exam-paper');
+		const options = document.querySelectorAll("label > input");
+		function selectOption(index) {
+			options.forEach(option => {
+				option.removeAttribute("checked");
+			});
+			if (options.length > index) {
+				options[index].setAttribute("checked", true);
+			}
+		}
+		function selectPaper(iter) {
+			if (papers !== null) {
+				for (let i = 0; i < papers.length; i++) {
+					if (papers[i].getAttribute("aria-current") != null) {
+						if (i + iter >= 0 && i + iter < papers.length) {
+							papers[i + iter].click();
+						}
+					}
+				}
+			}
+		}
+		document.onkeydown = (ev) => {
+			switch (ev.key) {
+				case '1':
+					selectOption(0);
+					break
+				case '2':
+					selectOption(1);
+					break
+				case '3':
+					selectOption(2);
+					break
+				case '4':
+					selectOption(3);
+					break
+				case '5':
+					selectOption(4);
+					break
+			}
+		}
+		document.onkeyup = (ev) => {
+			switch (ev.key) {
+				case 'ArrowLeft':
+					if (prevQuestion !== null) {
+						prevQuestion.click();
+					}
+					break
+				case 'ArrowRight':
+					if (nextQuestion !== null) {
+						nextQuestion.click();
+					}
+					break
+				case 'ArrowUp':
+					selectPaper(-1);
+					break;
+				case 'ArrowDown':
+					selectPaper(1);
+					break;
+			}
+		}
 	</script>
 </body>
 </html>
