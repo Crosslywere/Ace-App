@@ -10,6 +10,7 @@ import com.ace.app.entity.CandidateQuestionAnswerMapper;
 import com.ace.app.entity.Exam;
 import com.ace.app.entity.Paper;
 import com.ace.app.model.CandidateId;
+import com.ace.app.model.PaperId;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -96,5 +97,9 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 
 	public CandidateId getCandidateId( Exam exam ) {
 		return new CandidateId( exam, field1, field2 );
+	}
+
+	public PaperId getPaperId( Exam exam ) {
+		return new PaperId( exam, currentPaperName );
 	}
 }
