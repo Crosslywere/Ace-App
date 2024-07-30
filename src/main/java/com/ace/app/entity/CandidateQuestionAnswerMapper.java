@@ -57,11 +57,11 @@ public class CandidateQuestionAnswerMapper {
 		candidateQuestionAnswerId.setCandidateQuestionNumber( candidateQuestionNumber );
 	}
 
-	public Paper getPaper() {
+	public String getPaperName() {
 		if ( candidateQuestionAnswerId == null ) {
 			return null;
 		}
-		return candidateQuestionAnswerId.getPaper();
+		return candidateQuestionAnswerId.getPaperName();
 	}
 
 	public void setPaper( Paper paper ) {
@@ -69,13 +69,6 @@ public class CandidateQuestionAnswerMapper {
 			candidateQuestionAnswerId = new CandidateQuestionAnswerMapperId();
 		}
 		candidateQuestionAnswerId.setPaper( paper );
-	}
-
-	public Candidate getCandidate() {
-		if ( candidateQuestionAnswerId == null ) {
-			return null;
-		}
-		return candidateQuestionAnswerId.getCandidate();
 	}
 
 	public void setCandidate( Candidate candidate ) {

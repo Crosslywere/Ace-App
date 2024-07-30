@@ -55,7 +55,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		field1 = candidate.getField1();
 		field2 = candidate.getField2();
 
-		currentPaperName = currentMap.getPaper().getName();
+		currentPaperName = currentMap.getPaperName();
 		currentPaperQuestionNumber = currentMap.getCandidateQuestionNumber();
 		currentPaperQuestionOptionIndex = currentMap.getAnswerIndex();
 
@@ -69,7 +69,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		} );
 		currentPaperQuestionsAnswered = new LinkedHashMap<>();
 		candidate.getAnswerMapper().forEach( map -> {
-			if ( currentPaperName == map.getPaper().getName() ) {
+			if ( currentPaperName.equals( map.getPaperName() ) ) {
 				currentPaperQuestionsAnswered.put( map.getCandidateQuestionNumber(), map.getAnswerIndex() != null );
 			}
 		} );
