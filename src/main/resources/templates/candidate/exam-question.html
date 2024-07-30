@@ -30,6 +30,16 @@
 			height: 44px;
 			min-width: 48px;
 		}
+		#question-select > .current {
+			background-color: green;
+		}
+		#question-select > .answered {
+			background-color: aqua;
+			color: black;
+		}
+		#papers > [aria-current="true"] {
+			background-color: aqua;
+		}
 	</style>
 	<title th:text="|${exam.title} - ${candidate.currentPaperName}|"></title>
 </head>
@@ -43,16 +53,17 @@
 		<input type="text" th:field="*{field2}" hidden>
 		<input type="number" th:field="*{currentPaperQuestionNumber}" hidden>
 		<input type="number" th:field="*{timeUsed}" hidden>
+		<input type="text" th:field="*{currentPaperName}" hidden>
 		<div class="width-100 flex-row align-center">
 			<button th:if="*{prevQuestionPath != null}" type="submit" id="prev-question" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
 			<h2 th:text="|*{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
 			<button th:if="*{nextQuestionPath != null}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;">Next</button>
 		</div>
 		<p th:text="|*{currentPaperQuestionNumber}. *{currentQuestionStr}|"></p>
-		<th:block th:each="option : *{currentOptions}">
+		<th:block th:each="option, optionIndex : *{currentOptions}">
 			<div style="margin-bottom:16px;padding:0 66px">
 				<label>
-					<input type="radio" th:field="*{currentAnswerIndex}" th:value="${option}">
+					<input type="radio" th:field="*{currentAnswerIndex}" th:value="${optionIndex.index}">
 					<span th:text="${option}"></span>
 				</label>
 			</div>
@@ -65,10 +76,11 @@
 			th:formaction="@{/exam/{paperName}/{questionNumber}(paperName=*{currentPaperName},questionNumber=${i})}"
 			th:text="|Q${i}|">Q1</button>
 		</div>
-		<div class="papers">
+		<div id="papers">
 			<th:block th:each="paper : *{paperNames}" th:with="currentPaper=*{currentPaperName}">
-				<button th:formaction="@{/exam/{paperName}/1(paperName=${paper})}" th:aria-current="${currentPaper == paper ? 'true' : ''}" th:text="${paper}" class="exam-paper">Paper</button>
+				<button type="submit" th:formaction="@{/exam/{paperName}/1(paperName=${paper})}" th:aria-current="${currentPaper == paper ? 'true' : ''}" th:text="${paper}" class="exam-paper none-btn border">Paper</button>
 			</th:block>
+			<button type="submit" th:formaction="@{/submit}" class="exam-paper none-btn border">Submit</button>
 		</div>
 	</form>
 	<script>
@@ -128,19 +140,19 @@
 			switch (ev.key) {
 				case '1':
 					selectOption(0);
-					break
+					break;
 				case '2':
 					selectOption(1);
-					break
+					break;
 				case '3':
 					selectOption(2);
-					break
+					break;
 				case '4':
 					selectOption(3);
-					break
+					break;
 				case '5':
 					selectOption(4);
-					break
+					break;
 			}
 		}
 		document.onkeyup = (ev) => {
@@ -149,12 +161,12 @@
 					if (prevQuestion !== null) {
 						prevQuestion.click();
 					}
-					break
+					break;
 				case 'ArrowRight':
 					if (nextQuestion !== null) {
 						nextQuestion.click();
 					}
-					break
+					break;
 				case 'ArrowUp':
 					selectPaper(-1);
 					break;
