@@ -213,8 +213,13 @@ public class CandidateController {
 		return "candidate/exam-question";
 	}
 
-	@GetMapping( "/exam/{paper}/1" )
-	public String getQuestion( @PathVariable( "paper" ) String paper, ExamCandidateDTO candidateDTO, Model model ) {
-		return "candidate/exam-question";
+	@PostMapping( "/exam/submit" )
+	public String submitConfirm( ExamCandidateDTO candidateDTO, Model model ) {
+		return "candidate/exam-submit";
+	}
+
+	@PostMapping( "exam/submitted" )
+	public String submit( ExamCandidateDTO candidateDTO, Model model ) {
+		return "candidate/exam-submitted";
 	}
 }
