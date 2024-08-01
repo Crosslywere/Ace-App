@@ -138,9 +138,11 @@ public class CandidateServiceImpl implements CandidateService {
 				}
 			}
 			candidate.setHasLoggedIn( true );
-			candidate.getPapers().forEach( paper -> {
-				appendQuestions( candidate, paper );
-			} );
+			if ( candidate.getAnswerMapper() == null || candidate.getAnswerMapper().size() == 0 ) {
+				candidate.getPapers().forEach( paper -> {
+					appendQuestions( candidate, paper );
+				} );
+			}
 			return candidateRepository.save( candidate );
 		}
 	}
