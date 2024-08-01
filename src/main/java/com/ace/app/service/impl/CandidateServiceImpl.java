@@ -93,7 +93,9 @@ public class CandidateServiceImpl implements CandidateService {
 			// Return exam select page
 			throw new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null );
 		}
-		Exam exam = examRepository.findById( candidateDTO.getExamId() ).orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null ) );
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+		//
+		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null ) );
 		if ( exam.getState() != ExamState.Ongoing ) {
 			// Return exam select page
 			throw new CandidateException( "Invalid exam selected", CandidateExceptionType.INVALID_EXAM, null );
@@ -207,6 +209,13 @@ public class CandidateServiceImpl implements CandidateService {
 		Collections.shuffle( paper.getQuestions(), rand );
 		if ( candidate.getAnswerMapper() == null ) {
 			candidate.setAnswerMapper( new ArrayList<>() );
+		} else {
+			CandidateQuestionAnswerMapperId mapperId = new CandidateQuestionAnswerMapperId( 1, candidate, paper );
+			for ( CandidateQuestionAnswerMapper mapper : candidate.getAnswerMapper() ) {
+				if ( mapper.getCandidateQuestionAnswerId().equals( mapperId ) ) {
+					return;
+				}
+			}
 		}
 		for ( int i = 0; i < paper.getQuestionsPerCandidate(); i++ ) {
 			candidate.getAnswerMapper().add( new CandidateQuestionAnswerMapper(  i + 1, candidate, paper.getQuestions().get( i ) ) );

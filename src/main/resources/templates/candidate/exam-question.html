@@ -80,7 +80,7 @@
 			<th:block th:each="paper : *{paperNames}" th:with="currentPaper=*{currentPaperName}">
 				<button type="submit" th:formaction="@{/exam/{paperName}/1(paperName=${paper})}" th:aria-current="${currentPaper == paper ? 'true' : ''}" th:text="${paper}" class="exam-paper none-btn border">Paper</button>
 			</th:block>
-			<button type="submit" th:formaction="@{/submit}" class="exam-paper none-btn border">Submit</button>
+			<button type="submit" th:formaction="@{/exam/submit}" class="exam-paper none-btn border">Submit</button>
 		</div>
 	</form>
 	<script>

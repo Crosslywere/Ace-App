@@ -141,9 +141,6 @@ public class CandidateController {
 		} catch ( CandidateException e ) {
 			switch ( e.getType() ) {
 				// TODO Handle errors
-				case INVALID_CANDIDATE -> {
-					return "redirect:/exam/select";
-				}
 				case INVALID_CREDENTIALS -> {
 					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
 						candidateDTO = ( RegisterCandidateDTO )e.getObject();
@@ -169,8 +166,6 @@ public class CandidateController {
 						model.addAttribute( "candidate", candidateDTO );
 						model.addAttribute( "exam", exam );
 						return "candidate/exam-papers";
-					} else {
-						return "redirect:/exam/select";
 					}
 				}
 				default -> {
