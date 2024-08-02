@@ -30,15 +30,23 @@
 			height: 44px;
 			min-width: 48px;
 		}
+		#question-select > *:first-child {
+			border-top-left-radius: .5em;
+		}
+		#question-select > *:last-child {
+			border-bottom-right-radius: .5em;
+		}
 		#question-select > .current {
-			background-color: green;
+			background-color: #3498DB;
+			color: white;
 		}
 		#question-select > .answered {
-			background-color: aqua;
-			color: black;
+			background-color: green;
+			color: white;
 		}
-		#papers > [aria-current="true"] {
-			background-color: aqua;
+		#question-select > .not-answered {
+			background-color: #FF1800;
+			color: white;
 		}
 	</style>
 	<title th:text="|${exam.title} - ${candidate.currentPaperName}|"></title>
@@ -72,15 +80,18 @@
 			<button type="submit"
 			th:each="map : *{currentPaperQuestionsAnswered}"
 			th:with="i=${map.key}, currNum=*{currentPaperQuestionNumber}"
-			th:class="|${currNum == i ? 'current' : map.value ? 'answered' : ''} none-btn border|"
+			th:class="|${currNum == i ? 'current' : map.value ? 'answered' : 'not-answered'} none-btn border|"
 			th:formaction="@{/exam/{paperName}/{questionNumber}(paperName=*{currentPaperName},questionNumber=${i})}"
 			th:text="|Q${i}|">Q1</button>
 		</div>
-		<div id="papers">
+		<div id="papers" class="hidden">
 			<th:block th:each="paper : *{paperNames}" th:with="currentPaper=*{currentPaperName}">
-				<button type="submit" th:formaction="@{/exam/{paperName}/1(paperName=${paper})}" th:aria-current="${currentPaper == paper ? 'true' : ''}" th:text="${paper}" class="exam-paper none-btn border">Paper</button>
+				<button type="submit"
+				th:formaction="@{/exam/{paperName}/1(paperName=${paper})}"
+				th:aria-current="${currentPaper == paper ? 'true' : ''}"
+				th:text="${paper}">Paper</button>
 			</th:block>
-			<button type="submit" th:formaction="@{/exam/submit}" class="exam-paper none-btn border">Submit</button>
+			<button type="submit" th:formaction="@{/exam/submit}">Submit</button>
 		</div>
 	</form>
 	<script>
@@ -93,7 +104,7 @@
 			var h = Math.floor(t % (60 * 60 * 24) / (60 * 60));
 			var m = Math.floor(t % (60 * 60) / 60);
 			var s = Math.floor(t % 60);
-			return h + ':' + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s);
+			return (h > 0 ? h + ':' : '') + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s);
 		}
 		function startTimer() {
 			duration.innerHTML = timeWriter(timeAllowed);
@@ -106,10 +117,20 @@
 				timeSlot.innerHTML = timeWriter(timeRemaining);
 				timeUsed.setAttribute("value", t);
 				if (timeUsed.value >= timeAllowed) {
-					clearInterval(interval);
 					document.querySelector("form").submit();
 				}
 			}, 100);
+			var pastTime = 0;
+			var timePoint = 0;
+			document.onvisibilitychange = (ev) => {
+				if (document.visibilityState == "hidden") {
+					timePoint = parseFloat(timeUsed.value);
+					pastTime = Date.now();
+				} else if (document.visibilityState == "visible") {
+					timePoint += (Date.now() - pastTime) / 1000;
+					timeUsed.setAttribute("value", timePoint);
+				}
+			}
 		}
 		startTimer();
 		// Keyboard controls
