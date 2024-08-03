@@ -2,10 +2,7 @@ package com.ace.app.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import java.util.Random;
-import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,10 +13,8 @@ import com.ace.app.entity.Candidate;
 import com.ace.app.entity.CandidateQuestionAnswerMapper;
 import com.ace.app.entity.Exam;
 import com.ace.app.entity.Paper;
-import com.ace.app.entity.Question;
 import com.ace.app.model.CandidateException;
 import com.ace.app.model.CandidateExceptionType;
-import com.ace.app.model.CandidateId;
 import com.ace.app.model.CandidateQuestionAnswerMapperId;
 import com.ace.app.model.ExamState;
 import com.ace.app.model.PaperId;
@@ -29,14 +24,11 @@ import com.ace.app.repository.ExamRepository;
 import com.ace.app.repository.PaperRepository;
 import com.ace.app.service.CandidateService;
 
-import jakarta.validation.constraints.NotNull;
-
 /**
  * @author Ogboru Jude
  * @version 0.0.1-SNAPSHOT
  */
 @Service
-@SuppressWarnings( "unused" )
 public class CandidateServiceImpl implements CandidateService {
 	
 	@Autowired
