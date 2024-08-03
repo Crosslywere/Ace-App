@@ -86,29 +86,27 @@ public class CandidateController {
 		try {
 			candidate = candidateService.putCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
-			switch ( e.getType() ) {
-				case INVALID_CANDIDATE -> {
-					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
-						candidateDTO = ( RegisterCandidateDTO )e.getObject();
-						model.addAttribute( "errorMessage", e.getMessage() );
-						return examLogin( candidateDTO, model );
-					} else {
-						return "redirect:/exam/select";
-					}
+			model.addAttribute( "errorMessage", e.getMessage() );
+			switch ( e.getRedirect() ) {
+				case EXAM_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
 				}
-				case INVALID_CREDENTIALS -> {
-					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
-						candidateDTO = ( RegisterCandidateDTO )e.getObject();
-						model.addAttribute( "errorMessage", e.getMessage() );
-						return examLogin( candidateDTO, model );
-					} else {
-						return "redirect:/exam/select";
-					}
+				case PAPER_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exam", exam );
 				}
-				default -> {
-					return "redirect:/exam/select";
+				case LOGIN_PAGE -> {
+					model.addAttribute( "field1", exam.getLoginField1() );
+					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
+					model.addAttribute( "field2", exam.getLoginField2() );
+					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
+					model.addAttribute( "candidate", candidateDTO );
+				}
+				case ERROR -> {
 				}
 			}
+			return e.getRedirect().getPath();
 		}
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
@@ -139,39 +137,27 @@ public class CandidateController {
 		try {
 			candidate = candidateService.loginCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
-			switch ( e.getType() ) {
-				// TODO Handle errors
-				case INVALID_CREDENTIALS -> {
-					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
-						candidateDTO = ( RegisterCandidateDTO )e.getObject();
-						model.addAttribute( "errorMessage", e.getMessage() );
-						return examLogin( candidateDTO, model );
-					} else {
-						return "redirect:/exam/select";
-					}
+			model.addAttribute( "errorMessage", e.getMessage() );
+			switch ( e.getRedirect() ) {
+				case EXAM_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
 				}
-				case INVALID_PAPER_COUNT -> {
-					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
-						candidateDTO = ( RegisterCandidateDTO )e.getObject();
-						model.addAttribute( "errorMessage", e.getMessage() );
-						return examPapers( candidateDTO, model );
-					} else {
-						return "redirect:/exam/select";
-					}
+				case PAPER_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exam", exam );
 				}
-				case INVALID_PAPER_SELECTED -> {
-					if ( e.getObject() != null && e.getObject() instanceof RegisterCandidateDTO ) {
-						candidateDTO = ( RegisterCandidateDTO )e.getObject();
-						model.addAttribute( "errorMessage", e.getMessage() );
-						model.addAttribute( "candidate", candidateDTO );
-						model.addAttribute( "exam", exam );
-						return "candidate/exam-papers";
-					}
+				case LOGIN_PAGE -> {
+					model.addAttribute( "field1", exam.getLoginField1() );
+					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
+					model.addAttribute( "field2", exam.getLoginField2() );
+					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
+					model.addAttribute( "candidate", candidateDTO );
 				}
-				default -> {
-					return "redirect:/exam/select";
+				case ERROR -> {
 				}
 			}
+			return e.getRedirect().getPath();
 		}
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
@@ -196,12 +182,27 @@ public class CandidateController {
 		try {
 			candidateDTO = candidateService.submitQuestion( candidateDTO, paperName, number );
 		} catch ( CandidateException e ) {
-			switch ( e.getType() ) {
-				// TODO handle cases
-				default -> {
-					return "redirect:/exam/select";
+			model.addAttribute( "errorMessage", e.getMessage() );
+			switch ( e.getRedirect() ) {
+				case EXAM_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
+				}
+				case PAPER_SELECT -> {
+					model.addAttribute( "candidate", candidateDTO );
+					model.addAttribute( "exam", exam );
+				}
+				case LOGIN_PAGE -> {
+					model.addAttribute( "field1", exam.getLoginField1() );
+					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
+					model.addAttribute( "field2", exam.getLoginField2() );
+					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
+					model.addAttribute( "candidate", candidateDTO );
+				}
+				case ERROR -> {
 				}
 			}
+			return e.getRedirect().getPath();
 		}
 		model.addAttribute( "exam", exam );
 		model.addAttribute( "candidate", candidateDTO );

@@ -8,22 +8,11 @@ import lombok.Getter;
  */
 @Getter
 public class CandidateException extends Exception {
-	
-	private CandidateExceptionType type;
-	
-	private Object object = null;
 
-	public CandidateException( String message, CandidateExceptionType type, Object object ) {
+	private CandidateExceptionRedirect redirect;
+
+	public CandidateException( String message, CandidateExceptionRedirect redirect ) {
 		super( message );
-		this.type = type;
-		this.object = object;
-	}
-
-	public CandidateException( CandidateExceptionType type, Object object ) {
-
-	}
-
-	public CandidateException( CandidateExceptionType type ) {
-		
+		this.redirect = redirect;
 	}
 }
