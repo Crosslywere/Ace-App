@@ -46,13 +46,11 @@ public class CandidateServiceImpl implements CandidateService {
 	@Override
 	public Candidate putCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException {
 		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
-			// Return exam select page
 			throw new CandidateException( "Unable to get candidate", CandidateExceptionRedirect.EXAM_SELECT );
 		}
 		Exam exam = examRepository.findById( candidateDTO.getExamId() )
 		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
 		if ( exam.getState() != ExamState.Ongoing ) {
-			// Return exam select page
 			throw new CandidateException( "Invalid exam selected. Exam no longer holding.", CandidateExceptionRedirect.EXAM_SELECT );
 		}
 		Candidate tempCandidate = new Candidate( candidateDTO, exam );
@@ -61,18 +59,15 @@ public class CandidateServiceImpl implements CandidateService {
 			if ( candidate != null && !candidate.getHasLoggedIn() ) {
 				return candidate;
 			} else if ( candidate != null && candidate.getHasLoggedIn() ) {
-				// Return candidate login page
 				throw new CandidateException( "Already logged in", CandidateExceptionRedirect.LOGIN_PAGE );
 			} else {
-				// Return candidate login page
-				throw new CandidateException( "Invalid Credentials", CandidateExceptionRedirect.LOGIN_PAGE );
+				throw new CandidateException( "Invalid credentials", CandidateExceptionRedirect.LOGIN_PAGE );
 			}
 		} else {
 			Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
 			if ( candidate != null && !candidate.getHasLoggedIn() ) {
 				return candidate;
 			} else if ( candidate != null && candidate.getHasLoggedIn() ) {
-				// Return candidate login page
 				throw new CandidateException( "Already logged in", CandidateExceptionRedirect.LOGIN_PAGE );
 			} else {
 				return candidateRepository.save( tempCandidate );
@@ -158,8 +153,71 @@ public class CandidateServiceImpl implements CandidateService {
 		return getQuestion( candidate, exam, paperName, questionNumber );
 	}
 
+	public void answerQuestion( ExamCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null ) {
+			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+		// 
+		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Exam is not ongoing", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Candidate candidate = candidateRepository.findById( candidateDTO.getCandidateId( exam ) )
+		// 
+		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
+
+		updateQuestion( candidateDTO, candidate, exam );
+	}
+
+	public ExamCandidateDTO getExamCandidateQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException {
+		if ( candidateDTO == null ) {
+			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Exam is not ongoing", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Candidate candidate = candidateRepository.findById( candidateDTO.getCandidateId( exam ) )
+		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
+			throw new CandidateException( "Time concluded", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		PaperId paperId = new PaperId( exam, paperName );
+		Paper paper = paperRepository.findById( paperId ).orElse( null );
+		if ( paper == null ) {
+			// Paper doesn't exist
+			throw new CandidateException( "Invalid paper", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( new CandidateQuestionAnswerMapperId( questionNumber, candidate, paper ) )
+		.orElseThrow( () -> new CandidateException( "Invalid question requested", CandidateExceptionRedirect.ERROR ) );
+		return new ExamCandidateDTO( candidate, map );
+	}
+
+	public void submitExam( ExamCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null ) {
+			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+		// 
+		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Exam is not ongoing", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Candidate candidate = candidateRepository.findById( candidateDTO.getCandidateId( exam ) )
+		// 
+		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( !candidate.getSubmitted() ) {
+			candidate.setSubmitted( true );
+			candidateRepository.save( candidate );
+		} else {
+			throw new CandidateException( "Candidate has already submitted!", CandidateExceptionRedirect.SUBMITTED );
+		}
+	}
+
 	private void updateQuestion( ExamCandidateDTO candidateDTO, Candidate candidate, Exam exam ) {
-		if ( candidateDTO.getTimeUsed() != null ) {
+		if ( candidateDTO.getTimeUsed() != null && candidateDTO.getTimeUsed() > candidate.getTimeUsed() ) {
 			candidate.setTimeUsed( candidateDTO.getTimeUsed() );
 			candidate.setHasLoggedIn( true );
 			if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
@@ -171,7 +229,6 @@ public class CandidateServiceImpl implements CandidateService {
 				CandidateQuestionAnswerMapperId mapId = new CandidateQuestionAnswerMapperId( candidateDTO.getCurrentPaperQuestionNumber(), candidate, paper );
 				CandidateQuestionAnswerMapper answeredMap = candidateQuestionAnswerMapperRepository.findById( mapId ).orElse( null );
 				if ( answeredMap != null ) {
-					// TODO Fix saving the answer
 					answeredMap.setAnswerIndex( candidateDTO.getCurrentAnswerIndex() );
 					candidateQuestionAnswerMapperRepository.save( answeredMap );
 				}

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import com.ace.app.dto.BaseCandidateDTO;
 import com.ace.app.dto.ExamCandidateDTO;
 import com.ace.app.dto.RegisterCandidateDTO;
 import com.ace.app.entity.Candidate;
@@ -32,7 +33,7 @@ public class CandidateController {
 	/**
 	 * @return A redirect to the start of the exam login sequence ie the {@code /exam/select}
 	 */
-	@GetMapping( "/exam" )
+	@GetMapping( { "/exam", "/exam/" } )
 	public String examIndex() {
 		return "redirect:/exam/select";
 	}
@@ -86,27 +87,7 @@ public class CandidateController {
 		try {
 			candidate = candidateService.putCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
-			model.addAttribute( "errorMessage", e.getMessage() );
-			switch ( e.getRedirect() ) {
-				case EXAM_SELECT -> {
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
-				}
-				case PAPER_SELECT -> {
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exam", exam );
-				}
-				case LOGIN_PAGE -> {
-					model.addAttribute( "field1", exam.getLoginField1() );
-					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
-					model.addAttribute( "field2", exam.getLoginField2() );
-					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
-					model.addAttribute( "candidate", candidateDTO );
-				}
-				case ERROR -> {
-				}
-			}
-			return e.getRedirect().getPath();
+			return handleCandidateException( e, candidateDTO, exam, model );
 		}
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
@@ -137,27 +118,7 @@ public class CandidateController {
 		try {
 			candidate = candidateService.loginCandidate( candidateDTO );
 		} catch ( CandidateException e ) {
-			model.addAttribute( "errorMessage", e.getMessage() );
-			switch ( e.getRedirect() ) {
-				case EXAM_SELECT -> {
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
-				}
-				case PAPER_SELECT -> {
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exam", exam );
-				}
-				case LOGIN_PAGE -> {
-					model.addAttribute( "field1", exam.getLoginField1() );
-					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
-					model.addAttribute( "field2", exam.getLoginField2() );
-					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
-					model.addAttribute( "candidate", candidateDTO );
-				}
-				case ERROR -> {
-				}
-			}
-			return e.getRedirect().getPath();
+			return handleCandidateException( e, candidateDTO, exam, model );
 		}
 		if ( candidate == null ) {
 			return "redirect:/exam/select";
@@ -179,10 +140,52 @@ public class CandidateController {
 		if ( exam == null ) {
 			return "redirect:/exam/select";
 		}
+		if ( candidateDTO.getCurrentAnswerIndex() == null ) {
+			System.out.println("End/Start");
+			try {
+				candidateDTO = candidateService.getExamCandidateQuestion( candidateDTO, paperName, number );
+			} catch ( CandidateException e ) {
+				System.out.println("Caught exception");
+				return handleCandidateException( e, candidateDTO, exam, model );
+			}
+			model.addAttribute( "exam", exam );
+			model.addAttribute( "candidate", candidateDTO );
+			return "candidate/exam-question";
+		}
 		try {
 			candidateDTO = candidateService.submitQuestion( candidateDTO, paperName, number );
 		} catch ( CandidateException e ) {
-			model.addAttribute( "errorMessage", e.getMessage() );
+			return handleCandidateException( e, candidateDTO, exam, model );
+		}
+		model.addAttribute( "exam", exam );
+		model.addAttribute( "candidate", candidateDTO );
+		return "candidate/exam-question";
+	}
+
+
+	@PostMapping( "/exam/submit" )
+	public String submitConfirm( ExamCandidateDTO candidateDTO, Model model ) {
+		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
+		if ( exam == null ) {
+			return "redirect:/exam/select";
+		}
+		try {
+			candidateService.answerQuestion( candidateDTO );
+		} catch ( CandidateException e ) {
+			return handleCandidateException( e, candidateDTO, exam, model );
+		}
+		model.addAttribute( "candidate", candidateDTO );
+		return "candidate/exam-submit";
+	}
+
+	@PostMapping( "exam/submitted" )
+	public String submit( ExamCandidateDTO candidateDTO, Model model ) {
+		model.addAttribute( "candidate", candidateDTO );
+		return "candidate/exam-submitted";
+	}
+
+	private <T extends BaseCandidateDTO> String handleCandidateException( CandidateException e, T candidateDTO, Exam exam, Model model ) {
+		model.addAttribute( "errorMessage", e.getMessage() );
 			switch ( e.getRedirect() ) {
 				case EXAM_SELECT -> {
 					model.addAttribute( "candidate", candidateDTO );
@@ -199,23 +202,12 @@ public class CandidateController {
 					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
 					model.addAttribute( "candidate", candidateDTO );
 				}
+				case SUBMITTED -> {
+					model.addAttribute( "candidate", candidateDTO );
+				}
 				case ERROR -> {
 				}
 			}
-			return e.getRedirect().getPath();
-		}
-		model.addAttribute( "exam", exam );
-		model.addAttribute( "candidate", candidateDTO );
-		return "candidate/exam-question";
-	}
-
-	@PostMapping( "/exam/submit" )
-	public String submitConfirm( ExamCandidateDTO candidateDTO, Model model ) {
-		return "candidate/exam-submit";
-	}
-
-	@PostMapping( "exam/submitted" )
-	public String submit( ExamCandidateDTO candidateDTO, Model model ) {
-		return "candidate/exam-submitted";
+		return e.getRedirect().getPath();
 	}
 }

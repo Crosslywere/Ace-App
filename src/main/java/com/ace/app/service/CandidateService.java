@@ -34,4 +34,28 @@ public interface CandidateService {
 	 * @throws CandidateException
 	 */
 	ExamCandidateDTO submitQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer number ) throws CandidateException;
+
+	/**
+	 * 
+	 * @param candidateDTO
+	 * @throws CandidateException
+	 */
+	void answerQuestion( ExamCandidateDTO candidateDTO ) throws CandidateException;
+
+	/**
+	 * 
+	 * @param candidateDTO
+	 * @param paperName
+	 * @param questionNumber
+	 * @return
+	 * @throws CandidateException
+	 */
+	ExamCandidateDTO getExamCandidateQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException;
+
+	/**
+	 * 
+	 * @param candidateDTO
+	 * @throws CandidateException
+	 */
+	void submitExam( ExamCandidateDTO candidateDTO ) throws CandidateException;
 }
