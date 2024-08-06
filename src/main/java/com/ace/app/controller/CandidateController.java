@@ -141,11 +141,9 @@ public class CandidateController {
 			return "redirect:/exam/select";
 		}
 		if ( candidateDTO.getCurrentAnswerIndex() == null ) {
-			System.out.println("End/Start");
 			try {
 				candidateDTO = candidateService.getExamCandidateQuestion( candidateDTO, paperName, number );
 			} catch ( CandidateException e ) {
-				System.out.println("Caught exception");
 				return handleCandidateException( e, candidateDTO, exam, model );
 			}
 			model.addAttribute( "exam", exam );
