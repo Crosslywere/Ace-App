@@ -102,8 +102,4 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 	public PaperId getPaperId( Exam exam ) {
 		return new PaperId( exam, currentPaperName );
 	}
-
-	public String getCurrentPath() {
-		return currentPaperName + "/" + currentPaperQuestionNumber;
-	}
 }
