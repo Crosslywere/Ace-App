@@ -7,7 +7,8 @@
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 	<style>
 		.container {
-			width: 1160px;
+			width: 100%;
+			max-width: 1160px;
 			margin:130px auto 0;
 		}
 		h2 {
@@ -41,7 +42,7 @@
 			color: white;
 		}
 		#question-select > .answered {
-			background-color: green;
+			background-color: #1B7A43;
 			color: white;
 		}
 		#question-select > .not-answered {
@@ -55,17 +56,28 @@
 	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a><section><span id="timer"></span>/<span id="duration" th:text="${exam.duration}"></span></section>
 	</div>
-	<form th:action="@{/exam/{next}(next=${candidate.nextQuestionPath})}" th:object="${candidate}" method="post" class="container">
-		<input type="number" th:field="*{examId}" hidden>
-		<input type="text" th:field="*{field1}" hidden>
-		<input type="text" th:field="*{field2}" hidden>
-		<input type="number" th:field="*{currentPaperQuestionNumber}" hidden>
-		<input type="number" th:field="*{timeUsed}" hidden>
-		<input type="text" th:field="*{currentPaperName}" hidden>
+	<div id="papers" class="hidden">
+		<th:block th:each="paper : ${candidate.paperNames}" th:with="currentPaper=${candidate.currentPaperName}">
+			<button type="submit"
+			th:formaction="@{/exam/{paperName}/1(paperName=${paper})}"
+			th:aria-current="${currentPaper == paper ? 'true' : ''}"
+			th:text="${paper}"
+			class="exam-paper"
+			form="question-form">Paper</button>
+		</th:block>
+		<button form="question-form" class="exam-paper" type="submit" th:formaction="@{/exam/submit}">Submit</button>
+		<input form="question-form" type="number" th:field="${candidate.examId}" hidden>
+		<input form="question-form" type="text" th:field="${candidate.field1}" hidden>
+		<input form="question-form" type="text" th:field="${candidate.field2}" hidden>
+		<input form="question-form" type="number" th:field="${candidate.currentPaperQuestionNumber}" hidden>
+		<input form="question-form" type="number" th:field="${candidate.timeUsed}" hidden>
+		<input form="question-form" type="text" th:field="${candidate.currentPaperName}" hidden>
+	</div>
+	<form th:object="${candidate}" id="question-form" method="post" class="container">
 		<div class="width-100 flex-row align-center">
 			<button th:if="*{prevQuestionPath != null}" type="submit" id="prev-question" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
 			<h2 th:text="|*{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
-			<button th:if="*{nextQuestionPath != null}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;">Next</button>
+			<button th:formaction="@{/exam/{next}(next=*{nextQuestionPath})}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="*{nextQuestionPath == 'submit' ? 'Submit' : 'Next'}">Next</button>
 		</div>
 		<p th:text="|*{currentPaperQuestionNumber}. *{currentQuestionStr}|"></p>
 		<th:block th:each="option, optionIndex : *{currentOptions}">
@@ -83,15 +95,6 @@
 			th:class="|${currNum == i ? 'current' : map.value ? 'answered' : 'not-answered'} none-btn border|"
 			th:formaction="@{/exam/{paperName}/{questionNumber}(paperName=*{currentPaperName},questionNumber=${i})}"
 			th:text="|Q${i}|">Q1</button>
-		</div>
-		<div id="papers" class="hidden">
-			<th:block th:each="paper : *{paperNames}" th:with="currentPaper=*{currentPaperName}">
-				<button type="submit"
-				th:formaction="@{/exam/{paperName}/1(paperName=${paper})}"
-				th:aria-current="${currentPaper == paper ? 'true' : ''}"
-				th:text="${paper}">Paper</button>
-			</th:block>
-			<button type="submit" th:formaction="@{/exam/submit}">Submit</button>
 		</div>
 	</form>
 	<script>

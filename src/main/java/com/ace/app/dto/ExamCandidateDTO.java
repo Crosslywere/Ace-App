@@ -85,7 +85,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 			prevQuestionPath = currentPaperName + "/" + ( currentPaperQuestionNumber - 1 );
 		}
 		if ( currentPaperIndex == paperNames.size() - 1 && currentPaperQuestionNumber == currentPaper.getQuestionsPerCandidate() ) {
-			nextQuestionPath = null;
+			nextQuestionPath = "submit";
 		} else if ( currentPaperIndex < paperNames.size() - 1 && currentPaperQuestionNumber == currentPaper.getQuestionsPerCandidate() ) {
 			nextQuestionPath = paperNames.get( currentPaperIndex + 1 ) + "/1";
 		} else {
@@ -101,5 +101,9 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 
 	public PaperId getPaperId( Exam exam ) {
 		return new PaperId( exam, currentPaperName );
+	}
+
+	public String getCurrentPath() {
+		return currentPaperName + "/" + currentPaperQuestionNumber;
 	}
 }
