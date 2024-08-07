@@ -57,5 +57,5 @@ public interface CandidateService {
 	 * @param candidateDTO
 	 * @throws CandidateException
 	 */
-	void submitExam( ExamCandidateDTO candidateDTO ) throws CandidateException;
+	Candidate submitExam( ExamCandidateDTO candidateDTO ) throws CandidateException;
 }
