@@ -31,7 +31,7 @@ public class CandidateQuestionAnswerMapper {
 	@ManyToOne
 	private Question question;
 
-	private Integer answerIndex;
+	private Short answerIndex;
 
 	public CandidateQuestionAnswerMapper( Integer candidateQuestionNumber, Candidate candidate, Paper paper, Question question ) {
 		this.candidateQuestionAnswerId = new CandidateQuestionAnswerMapperId( candidateQuestionNumber, candidate, paper );
@@ -76,5 +76,9 @@ public class CandidateQuestionAnswerMapper {
 			candidateQuestionAnswerId = new CandidateQuestionAnswerMapperId();
 		}
 		candidateQuestionAnswerId.setCandidate( candidate );
+	}
+
+	public boolean isCorrect() {
+		return question.getAnswerIndex() == answerIndex;
 	}
 }

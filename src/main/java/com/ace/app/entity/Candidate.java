@@ -42,7 +42,8 @@ public class Candidate {
 	@Column( nullable = false )
 	private Boolean hasLoggedIn = false;
 
-	private Integer score = 0;
+	@Column( nullable = false )
+	private Integer score = -1;
 
 	@Column( nullable = false )
 	private Float timeUsed = 0.0f;
@@ -103,5 +104,15 @@ public class Candidate {
 			candidateId = new CandidateId();
 		}
 		candidateId.setField2( field );
+	}
+
+	public static void score( Candidate candidate ) {
+		int score = 0;
+		for ( CandidateQuestionAnswerMapper answerMapper : candidate.getAnswerMapper() ) {
+			if ( answerMapper.isCorrect() ) {
+				score++;
+			}
+		}
+		candidate.setScore( score );
 	}
 }

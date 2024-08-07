@@ -25,11 +25,11 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 
 	private String currentPaperName = "";
 	private Integer currentPaperQuestionNumber = 0;
-	private Integer currentPaperQuestionOptionIndex = null;
+	private Short currentPaperQuestionOptionIndex = null;
 
 	private String currentQuestionStr = "";
 	private List<String> currentOptions = new ArrayList<>();
-	private Integer currentAnswerIndex = null;
+	private Short currentAnswerIndex = null;
 
 	private List<String> paperNames = new ArrayList<>();
 	private Map<Integer, Boolean> currentPaperQuestionsAnswered = new LinkedHashMap<>();
@@ -101,5 +101,9 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 
 	public PaperId getPaperId( Exam exam ) {
 		return new PaperId( exam, currentPaperName );
+	}
+
+	public void setCurrentAsPrevQuestionPath() {
+		prevQuestionPath = currentPaperName + "/" + currentPaperQuestionNumber;
 	}
 }
