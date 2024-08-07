@@ -29,12 +29,13 @@
 	<div class="container border br-16 white-bg">
 		<h2 class="text-center">Confirm submit</h2>
 		<form th:action="@{/exam/submitted}" th:object="${candidate}" method="post">
+			<input type="number" th:field="*{examId}" hidden>
 			<input type="text" th:field="*{field1}" hidden>
 			<input type="text" th:field="*{field2}" hidden>
 			<p class="text-center">Are you sure you want to submit <th:block th:text="|candidate *{field1}|"></th:block>?</p>
 			<div class="flex-row justify-between">
 				<button type="submit" class="action-btn br-16">Yes</button>
-				<button id="no-btn" class="alt-action-btn br-16" autofocus>No</button>
+				<button id="back-btn" class="alt-action-btn br-16" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}" autofocus>No</button>
 			</div>
 		</form>
 	</div>
@@ -43,7 +44,7 @@
 			switch (ev.key) {
 				case 'ArrowLeft':
 				case 'ArrowUp':
-					history.back();
+					document.getElementById('back-btn').click();
 					break;
 				case 'ArrowRight':
 				case 'ArrowDown':
