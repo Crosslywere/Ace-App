@@ -39,6 +39,7 @@ public class CandidateController {
 	}
 
 	/**
+	 * The template for selecting the exam to be taken
 	 * @param model Provided by Springboot to pass arguments to the template
 	 * @return The template for selecting the exam to be taken
 	 */
@@ -50,8 +51,9 @@ public class CandidateController {
 	}
 
 	/**
-	 * @param candidateDTO
-	 * @param model
+	 * The template for entering the candidate's credentials for their selected exam
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
 	 * @return The template for entering the candidate's login details
 	 */
 	@PostMapping( "/exam/login" )
@@ -69,12 +71,10 @@ public class CandidateController {
 	}
 
 	/**
-	 * In the case that the candidate has not selected the appropriate
-	 * number of questions the candidate returns the template else redirects
-	 * to the preamble page.
-	 * @param candidateDTO
-	 * @param model
-	 * @param redirect
+	 * Submits the current question answered in the candidateDTO object then gets the
+	 * question requested
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
 	 * @return The template for selecting the candidate's papers
 	 */
 	@PostMapping( "/exam/papers" )
@@ -89,23 +89,19 @@ public class CandidateController {
 		} catch ( CandidateException e ) {
 			return handleCandidateException( e, candidateDTO, exam, model );
 		}
-		if ( candidate == null ) {
-			return "redirect:/exam/select";
-		} else {
-			candidateDTO = new RegisterCandidateDTO( candidate );
-			if ( candidateDTO.getPaperNames().size() == exam.getPapersPerCandidate() ) {
-				return candidateValidate( candidateDTO, model );
-			}
-			model.addAttribute( "candidate", candidateDTO );
-			model.addAttribute( "exam", exam );
-			return "candidate/exam-papers";
+		candidateDTO = new RegisterCandidateDTO( candidate );
+		if ( candidateDTO.getPaperNames().size() == exam.getPapersPerCandidate() ) {
+			return candidateValidate( candidateDTO, model );
 		}
+		model.addAttribute( "candidate", candidateDTO );
+		model.addAttribute( "exam", exam );
+		return "candidate/exam-papers";
 	}
 
 	/**
-	 * 
-	 * @param candidateDTO
-	 * @param model
+	 * The template that explains the rules of the exam before the candidate starts
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
 	 * @return The preamble template
 	 */
 	@PostMapping( "/exam/validate" )
@@ -129,9 +125,11 @@ public class CandidateController {
 	}
 
 	/**
-	 * 
-	 * @param candidateDTO
-	 * @param model
+	 * The template that allows a candidate answer questions and returns the template that has the requested question
+	 * @param paperName The name of the paper to be served
+	 * @param number The question number of the question to be served
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
 	 * @return The exam question template for the selected exam
 	 */
 	@PostMapping( "/exam/{paper}/{number}" )
@@ -160,7 +158,12 @@ public class CandidateController {
 		return "candidate/exam-question";
 	}
 
-
+	/**
+	 * A confirmation template for submitting the exam
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
+	 * @return A template that allows the candidate to submit or review their previous answers
+	 */
 	@PostMapping( "/exam/submit" )
 	public String submitConfirm( ExamCandidateDTO candidateDTO, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
@@ -172,17 +175,45 @@ public class CandidateController {
 		} catch ( CandidateException e ) {
 			return handleCandidateException( e, candidateDTO, exam, model );
 		}
+		candidateDTO.setCurrentAsPrevQuestionPath();
 		model.addAttribute( "candidate", candidateDTO );
 		return "candidate/exam-submit";
 	}
 
+	/**
+	 * Sets the candidate as submitted and returns the template to affirm this
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param model Used to pass arguments to the template
+	 * @return The template for a submitted candidate
+	 */
 	@PostMapping( "exam/submitted" )
 	public String submit( ExamCandidateDTO candidateDTO, Model model ) {
-		model.addAttribute( "candidate", candidateDTO );
+		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
+		if ( exam == null ) {
+			System.out.println( "Failed to get exam" );
+			return "redirect:/exam/select";
+		}
+		Candidate candidate = null;
+		try {
+			candidate = candidateService.submitExam( candidateDTO );
+		} catch ( CandidateException e ) {
+			return handleCandidateException( e, candidateDTO, exam, model );
+		}
+		model.addAttribute( "exam", exam );
+		model.addAttribute( "candidate", candidate );
 		return "candidate/exam-submitted";
 	}
 
-	private <T extends BaseCandidateDTO> String handleCandidateException( CandidateException e, T candidateDTO, Exam exam, Model model ) {
+	/**
+	 * Processes the exception and returns the appropriate template
+	 * @param <DTO> A class that extends the {@code BaseCandidateDTO} class
+	 * @param e The exception to be handled
+	 * @param candidateDTO A structure that contains all the necessary candidate data
+	 * @param exam The targeted exam
+	 * @param model Used to pass arguments to the template
+	 * @return The redirect path specified by the exception
+	 */
+	private <DTO extends BaseCandidateDTO> String handleCandidateException( CandidateException e, DTO candidateDTO, Exam exam, Model model ) {
 		model.addAttribute( "errorMessage", e.getMessage() );
 			switch ( e.getRedirect() ) {
 				case EXAM_SELECT -> {
@@ -194,6 +225,9 @@ public class CandidateController {
 					model.addAttribute( "exam", exam );
 				}
 				case LOGIN_PAGE -> {
+					if ( exam == null ) {
+						return "redirect:/exam";
+					}
 					model.addAttribute( "field1", exam.getLoginField1() );
 					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
 					model.addAttribute( "field2", exam.getLoginField2() );

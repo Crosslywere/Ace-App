@@ -3,12 +3,39 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		.container {
+			width: 600px;
+			margin: 32px auto 0;
+			padding: 2em;
+		}
+		h2 {
+			margin: 32px auto;
+			font-size: 38px;
+			font-weight: 500;
+		}
+		a.action-btn {
+			padding: 22px;
+			margin-top: 48px;
+			font-weight: 600;
+		}
+	</style>
 	<title>Submitted</title>
 </head>
 <body class="offwhite-bg">
 	<div class="border-bottom flex-row justify-between align-center white-bg" style="padding:36px 72px 24px;">
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
 	</div>
-	
+	<div class="container border white-bg br-16">
+		<h2 class="text-center">Congratulations</h2>
+		<p class="text-center">You have concluded this exam.</p>
+		<th:block th:if="${exam.showResult}" th:with="scorePercent=${(candidate.score * 1.0) / candidate.answerMapper.size}">
+			<p class="text-center">You scored</p>
+			<h2 th:class="|text-center ${!exam.allowCutOffMark ? '' : scorePercent >= exam.cutOffMark ? 'green-text' : 'danger-text'}|" th:text="|${#numbers.formatDecimal(scorePercent * 100, 2, 1)}%|"></h2>
+		</th:block>
+		<p th:if="${errorMessage ne null}" class="text-center danger-text" th:text="|*${errorMessage}|"></p>
+		<a id="reset" th:href="@{/exam}" class="action-btn width-100 text-center br-16">Reset</a>
+	</div>
 </body>
 </html>
