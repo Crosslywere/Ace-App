@@ -20,6 +20,7 @@
 			display:block;
 			margin: 1em 0;
 			padding: 22px;
+			font-weight: 600;
 		}
 	</style>
 	<title>Error</title>
@@ -33,7 +34,7 @@
 		<p class="text-center"><b>Reason:</b> <span th:text="${errorMessage == null ? message : errorMessage}"></span></p>
 		<p class="text-center"><b>Error on page:</b> <span th:text="${path}"></span></p>
 		<th:block th:if="${errorMessage != null}">
-			<p>Please see invigilator to resolve this issue if it persists!</p>
+			<p class="text-center">Please see invigilator to resolve this issue if it persists!</p>
 		</th:block>
 		<a onclick="history.back()" class="action-btn width-100 br-16 text-center">Back to previous page</a>
 		<th:block th:if="${errorMessage != null}">
