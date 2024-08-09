@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ModifyOExamDTO  extends BaseExamDTO {
+public class ModifyOExamDTO extends BaseExamDTO {
 
 	private Boolean registrationLocked;
 	private List<ModifyOCandidateDTO> candidates  = new ArrayList<>();

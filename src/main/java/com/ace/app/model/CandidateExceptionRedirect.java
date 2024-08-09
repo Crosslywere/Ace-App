@@ -2,6 +2,10 @@ package com.ace.app.model;
 
 import lombok.Getter;
 
+/**
+ * @author Ogboru Jude
+ * @version 0.0.1-SNAPSHOT
+ */
 @Getter
 public enum CandidateExceptionRedirect {
 	EXAM_SELECT( "candidate/exam-select" ),
