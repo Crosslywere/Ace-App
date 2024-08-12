@@ -79,6 +79,6 @@ public class CandidateQuestionAnswerMapper {
 	}
 
 	public boolean isCorrect() {
-		return question.getAnswerIndex() == answerIndex;
+		return question.getAnswerIndex() != null && question.getAnswerIndex() == answerIndex;
 	}
 }
