@@ -103,6 +103,9 @@ body {
 .flex-col {
 	flex-direction: column;
 }
+.flex-wrap {
+	flex-wrap: wrap;
+}
 .justify-around {
 	justify-content: space-around;
 }
