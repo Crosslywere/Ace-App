@@ -37,6 +37,7 @@ public final class ModifySExamDTO extends CreateExamDTO {
 		super.endTime = exam.getEndTime().toString().replaceAll( ":\\d+$", "" );
 		super.scheduledDate = exam.getScheduledDate();
 		super.allowCutOffMark = exam.getAllowCutOffMark();
+		super.cutOffMark = exam.getCutOffMark();
 		super.papersPerCandidate = exam.getPapersPerCandidate();
 		super.showResult = exam.getShowResult();
 		super.loginField1 = exam.getLoginField1();
