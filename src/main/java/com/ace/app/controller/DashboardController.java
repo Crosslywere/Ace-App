@@ -1,14 +1,19 @@
 package com.ace.app.controller;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ace.app.dto.CreateExamDTO;
@@ -16,7 +21,9 @@ import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
 import com.ace.app.dto.QueryDTO;
 import com.ace.app.entity.Exam;
+import com.ace.app.entity.ExportConfig;
 import com.ace.app.model.ExamState;
+import com.ace.app.repository.ExamConfigRepository;
 import com.ace.app.service.ExamService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +38,9 @@ public class DashboardController {
 
 	@Autowired
 	private ExamService examService;
+
+	@Autowired
+	private ExamConfigRepository configRepo;
 
 	/**
 	 * Checks if the request is from either {@code localhost} or {@code 127.0.0.1}
@@ -212,7 +222,7 @@ public class DashboardController {
 	}
 
 	/**
-	 * TODO describe
+	 * Takes the incoming {@code examDTO} and extracts the candidates from the {@code candidatesLoginInfoDocument} .csv file
 	 * @param examDTO The exam to be created containing all information
 	 * @param model Provided by Springboot to pass arguments to the template
 	 * @param request Used to determine if request comes from the server
@@ -302,6 +312,13 @@ public class DashboardController {
 		return "redirect:/exam";
 	}
 
+	/**
+	 * Post mapping to review changes to ongoing exams before comitting them to the database
+	 * @param examDTO The exam to be modified containing all necessary information
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if the request comes from the server
+	 * @return The template containing the changes made to the exam for review
+	 */
 	@PostMapping( "/modify/ongoing/review" )
 	public String modifyOngoing( ModifyOExamDTO examDTO, Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
@@ -316,8 +333,8 @@ public class DashboardController {
 	}
 
 	/**
-	 * TODO
-	 * @param examDTO
+	 * Post mapping to update modified scheduled exam specified by the {@code examDTO}
+	 * @param examDTO The exam to be updated
 	 * @param request
 	 * @return
 	 */
@@ -333,6 +350,12 @@ public class DashboardController {
 		return "redirect:/exam";
 	}
 
+	/**
+	 * TODO
+	 * @param examDTO
+	 * @param request
+	 * @return
+	 */
 	@PostMapping( "/modify/ongoing" )
 	public String modifyOngoing( ModifyOExamDTO examDTO, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
@@ -353,14 +376,96 @@ public class DashboardController {
 	 * @return
 	 */
 	@GetMapping( "/export/{examId}")
-	public String export( @PathVariable( "examId") Long examId, Model model, HttpServletRequest request ) {
+	public String export( @PathVariable( "examId" ) Long examId, Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
 			Exam exam = examService.getExamById( examId ).orElse( null );
 			if ( exam == null || exam.getState() != ExamState.Recorded ) {
-				return "redirect:/scheduled";
+				return "redirect:/recorded";
 			}
+			ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig( exam ) );
+			config.setExamId( exam.getExamId() );
+			model.addAttribute( "config", config );
 			model.addAttribute( "exam", exam );
 			return "dashboard/export";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * Post mapping to get the link for downloading the exams details as a .csv file using the configured template
+	 * @param config 
+	 * @param model
+	 * @param request
+	 * @return
+	 */
+	@PostMapping( "/download" )
+	public String export( ExportConfig config, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( config.getExamId() ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Recorded ) {
+				return "redirect:/recorded";
+			}
+			configRepo.save( config );
+			model.addAttribute( "exam", exam );
+			return "dashboard/download";
+		}
+		return "redirect:/exam";
+	}
+
+	/**
+	 * TODO
+	 * @param examId
+	 * @param request
+	 * @return
+	 */
+	@ResponseBody
+	@GetMapping( "/download/{examId}" )
+	public FileSystemResource download( @PathVariable( "examId" ) Long examId, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Recorded ) {
+				return null;
+			}
+			try {
+				ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig() );
+				String result = config.export( exam );
+				File file = new File( config.getFilename() );
+				file.deleteOnExit();
+				if ( file.createNewFile() ) {
+					FileWriter writer = new FileWriter( file );
+					writer.write( result );
+					writer.close();
+				} else { // Failed to create a new file therefore file already exists
+					FileWriter writer = new FileWriter( file, false );
+					writer.write( result );
+					writer.close();
+				}
+				return new FileSystemResource( file );
+			} catch ( IOException e ) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * TODO
+	 * @param examId
+	 * @param model
+	 * @param request
+	 * @return
+	 */
+	@GetMapping( "/copy/{examId}" )
+	public String copy( @PathVariable( "examId") Long examId, Model model, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Recorded ) {
+				return "redirect:/exam";
+			}
+			// CopyExamDTO examDTO = new CopyExamDTO( exam );
+			// model.addAttribute( "exam", examDTO );
+			return "dashboard/modify-scheculed";
 		}
 		return "redirect:/exam";
 	}

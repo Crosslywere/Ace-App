@@ -3,30 +3,25 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 	<link rel="stylesheet" th:href="@{/css/dashboard.css}">
-	<link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
 	<style>
 		.container {
 			width: 806px;
-			height: fit-content;
-		}
-		.flex-row > label {
-			flex: 0.5;
-			max-width: 340px;
 		}
 	</style>
-	<title th:text="|Export - ${exam.title}|">Export Exam</title>
+	<title>Download</title>
 </head>
-<body>
+<body class="offwhite-bg">
 	<div class="flex-row" style="height:fit-content">
 		<div class="menu flex-col align-center white-bg">
 			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
 			<details open>
 				<summary class="flex-row justify-between align-center br-16" style="width:271px;background-color:#0F29420A;padding:12px 16px;"><span class="flex align-center"><img th:src="@{/images/dashboard-icon.svg}" alt="dashboard-icon" class="mr-8">Dashboard</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
 				<ul style="list-style:none;margin:15px 0 0 25px;padding-left:23px;" class="border-left">
-					<li><a th:href="@{/scheduled}">Currently Scheduled Exam</a></li>
-					<li><a th:href="@{/recorded}" class="blue-text">Exam Record</a></li>
+					<li><a th:href="@{/scheduled}" class="blue-text">Currently Scheduled Exam</a></li>
+					<li><a th:href="@{/recorded}">Exam Record</a></li>
 					<li th:if="${countOngoing > 0}"><a th:href="@{/ongoing}">Ongoing Exams</a></li>
 					<li><a th:href="@{/create}">Create New Exam</a></li>
 					<li><a th:href="@{/advanced-search}">Advanced Search</a></li>
@@ -43,18 +38,10 @@
 					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
 				</div>
 			</div>
-			<div class="container white-bg br-16 border flex-col fit-height" style="margin-top:40px">
-				<!-- Content goes here -->
-				<form th:action="@{/download}" th:object="${config}" method="post">
-					<input type="number" th:field="*{examId}" hidden>
-					<label>
-						<input type="checkbox" th:field="*{field2}">
-					</label>
-					<!-- <label>
-						<input type="checkbox" th:field="*{}">
-					</label> -->
-					<button type="submit">Configure</button>
-				</form>
+			<!-- Content here -->
+			<div class="container white-bg br-16 border" style="padding:0 53px 53px 53px;margin-top:55px;">
+				<h2 th:text="|Download - ${exam.title}|">Download Exam</h2>
+				<a th:href="@{/download/{id}(id=${exam.examId})}" th:download="export.csv" class="action-btn">Download</a>
 			</div>
 		</div>
 	</div>
