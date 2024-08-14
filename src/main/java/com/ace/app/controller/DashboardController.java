@@ -125,7 +125,7 @@ public class DashboardController {
 	}
 
 	/**
-	 * Gets a list of exams by their title 
+	 * Gets a list of exams by their title similar to the search query 
 	 * @param title The title to search for
 	 * @param model  Provided by Springboot to pass arguments to the template
 	 * @param request Used to determine if request comes from the server
@@ -133,7 +133,6 @@ public class DashboardController {
 	 */
 	@PostMapping( "/search" )
 	public String search( @Param( "search" ) String search, Model model, HttpServletRequest request ) {
-		// TODO implement
 		if ( isLocalhost( request ) ) {
 			if ( search == null || search.isBlank() ) {
 				return "redirect:/advanced-search";
@@ -334,9 +333,9 @@ public class DashboardController {
 
 	/**
 	 * Post mapping to update modified scheduled exam specified by the {@code examDTO}
-	 * @param examDTO The exam to be updated
-	 * @param request
-	 * @return
+	 * @param examDTO A data transfer object that contains the details for the exam to be updated
+	 * @param request Used to determine if the request comes from the server
+	 * @return A redirect to the scheduled template
 	 */
 	@PostMapping( "/modify/scheduled" )
 	public String modifyScheduled( ModifySExamDTO examDTO, HttpServletRequest request ) {
@@ -351,10 +350,10 @@ public class DashboardController {
 	}
 
 	/**
-	 * TODO
-	 * @param examDTO
-	 * @param request
-	 * @return
+	 * Post mapping to update a modified ongoing exam specified by the {@code examDTO}
+	 * @param examDTO A data transfer object that contains the details for the exam to be updated
+	 * @param request Used to determine if the request comes from the server
+	 * @return A redirect back to the ongoing exam template
 	 */
 	@PostMapping( "/modify/ongoing" )
 	public String modifyOngoing( ModifyOExamDTO examDTO, HttpServletRequest request ) {
@@ -369,11 +368,11 @@ public class DashboardController {
 	}
 
 	/**
-	 * TODO
-	 * @param examId
+	 * Get mapping to begin the configuration of the exam details to be exported
+	 * @param examId The examId of the exam to be exported
 	 * @param model Provided by Springboot to pass arguments to the template
 	 * @param request Used to determine if request comes from the server
-	 * @return
+	 * @return A template containing the parameters to be configured for the exam's export
 	 */
 	@GetMapping( "/export/{examId}")
 	public String export( @PathVariable( "examId" ) Long examId, Model model, HttpServletRequest request ) {
@@ -384,6 +383,7 @@ public class DashboardController {
 			}
 			ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig( exam ) );
 			config.setExamId( exam.getExamId() );
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			model.addAttribute( "config", config );
 			model.addAttribute( "exam", exam );
 			return "dashboard/export";
@@ -393,10 +393,10 @@ public class DashboardController {
 
 	/**
 	 * Post mapping to get the link for downloading the exams details as a .csv file using the configured template
-	 * @param config 
-	 * @param model
-	 * @param request
-	 * @return
+	 * @param config  The configuration to be used for the export.
+	 * @param model Provided by Springboot to pass arguments to the template
+	 * @param request Used to determine if the request comes from the server
+	 * @return A template containing the link to download the exported exam
 	 */
 	@PostMapping( "/download" )
 	public String export( ExportConfig config, Model model, HttpServletRequest request ) {
@@ -406,6 +406,7 @@ public class DashboardController {
 				return "redirect:/recorded";
 			}
 			configRepo.save( config );
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			model.addAttribute( "exam", exam );
 			return "dashboard/download";
 		}
@@ -413,10 +414,10 @@ public class DashboardController {
 	}
 
 	/**
-	 * TODO
-	 * @param examId
-	 * @param request
-	 * @return
+	 * Downloads a generated .csv file on the server to the client
+	 * @param examId The examId of the exam to be exported
+	 * @param request Used to determine if the request comes from the server
+	 * @return A .csv file that is representing the exam on the database
 	 */
 	@ResponseBody
 	@GetMapping( "/download/{examId}" )
@@ -458,6 +459,7 @@ public class DashboardController {
 	 */
 	@GetMapping( "/copy/{examId}" )
 	public String copy( @PathVariable( "examId") Long examId, Model model, HttpServletRequest request ) {
+		// TODO implement
 		if ( isLocalhost( request ) ) {
 			Exam exam = examService.getExamById( examId ).orElse( null );
 			if ( exam == null || exam.getState() != ExamState.Recorded ) {
