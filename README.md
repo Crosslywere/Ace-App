@@ -15,7 +15,9 @@ Go to [starter.spring.io](https://start.spring.io/#!type=maven-project&language=
 5. Answers should be able to be set in questions uploaded to the software.
 	> Implemented
 6. Exporting the results of the exam should be a CSV file.
+	> Implemented
 7. Exporting of the results should be customizable.
+	> Inprogress
 8. Change the question numbers to be more visible on the exam page for examinees.
 	> Implemented
 9. Implement keyboard navigations for question and answer selections for examinees.
