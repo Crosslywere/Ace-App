@@ -2,6 +2,8 @@
 
 Go to [starter.spring.io](https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.3.0-SNAPSHOT&packaging=jar&jvmVersion=21&groupId=com.ace&artifactId=app&name=AceExamPlatform&description=Ace%20Exam%20Platform%20project%20for%20Spring%20Boot&packageName=com.ace.app&dependencies=devtools,web,thymeleaf,postgresql,lombok,data-jpa,validation,mail) get the configuration.
 
+Also go to [e-iceblue](https://www.e-iceblue.com/Download/doc-for-java-free.html) for Spire.Doc dependency
+
 ## TODO List
 
 1. Once an examinee has signed in and started the exam they should be prevented from signing in again.
@@ -31,3 +33,6 @@ Go to [starter.spring.io](https://start.spring.io/#!type=maven-project&language=
 14. Candidates should not see weather they passed or not.
 	> Implemented
 15. Inform candidates of the exam via SMS and/or email.
+
+## HOW TO USE
+

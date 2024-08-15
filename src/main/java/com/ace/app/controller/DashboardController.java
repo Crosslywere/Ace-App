@@ -433,7 +433,7 @@ public class DashboardController {
 				File file = new File( config.getFilename() );
 				file.deleteOnExit();
 				if ( file.createNewFile() ) {
-					FileWriter writer = new FileWriter( file );
+					FileWriter writer = new FileWriter( file, false );
 					writer.write( result );
 					writer.close();
 				} else { // Failed to create a new file therefore file already exists

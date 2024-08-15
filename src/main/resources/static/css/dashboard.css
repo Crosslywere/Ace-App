@@ -115,7 +115,7 @@ button:disabled {
 h2 {
 	font-weight: 400;
 	font-size: 20px;
-	LINE-HEIGHT:28PX;
+	line-height:28PX;
 	margin: 48px 0 40px;
 }
 input[type="file"] ~ label.success-upload {

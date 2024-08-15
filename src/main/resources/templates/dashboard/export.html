@@ -11,14 +11,14 @@
 			width: 806px;
 			height: fit-content;
 		}
-		.flex-row > label {
+		.flex-row > .width-50 {
 			flex: 0.5;
 			max-width: 340px;
 		}
 	</style>
 	<title th:text="|Export - ${exam.title}|">Export Exam</title>
 </head>
-<body>
+<body class="offwhite-bg">
 	<div class="flex-row" style="height:fit-content">
 		<div class="menu flex-col align-center white-bg">
 			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
@@ -43,20 +43,82 @@
 					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
 				</div>
 			</div>
-			<div class="container white-bg br-16 border flex-col fit-height" style="margin-top:40px">
-				<!-- Content goes here -->
+			<div class="container white-bg br-16 border flex-col fit-height" style="padding:0 53px 53px 53px;margin-top:40px">
+				<h2>Configuration Exam Export</h2>
 				<form th:action="@{/download}" th:object="${config}" method="post">
 					<input type="number" th:field="*{examId}" hidden>
+					<div class="flex-row align-center">
+						<input type="checkbox" th:field="*{serialNumber}" class="mr-8">
+						<label class="width-100">
+							SERIAL NUMBER
+							<br>
+							<input type="text" th:field="*{serialNumberStr}" class="br-16 border">
+						</label>
+					</div>
+					<br>
 					<label>
-						<input type="checkbox" th:field="*{field2}">
+						FIELD 1
+						<br>
+						<input type="text" name="field1Str" id="field1Str" th:value="${exam.loginField1Desc}" class="br-16 border">
 					</label>
-					<!-- <label>
-						<input type="checkbox" th:field="*{}">
-					</label> -->
-					<button type="submit">Configure</button>
+					<br>
+					<div class="flex-row" th:if="${exam.loginField2.ordinal != 0}">
+						<input type="checkbox" th:field="*{field2}" class="mr-8">
+						<label class="width-100">
+							FIELD 2
+							<br>
+							<input type="text" name="field2Str" id="field2Str" th:value="${exam.loginField2Desc}" class="br-16 border">
+						</label>
+					</div>
+					<br>
+					<div class="flex-row">
+						<input type="checkbox" th:field="*{timeUsed}" class="mr-8">
+						<label class="width-100">
+							TIME USED (IN SECONDS)
+							<br>
+							<input type="text" th:field="*{timeUsedStr}" class="br-16 border">	
+						</label>
+					</div>
+					<br>
+					<label>
+						REPRESENT QUESTION AS
+						<select th:field="*{questionAs}" class="broder br-16">
+							<option value="-1">The Question Number Only</option>
+							<option value="0">The Question And The Number</option>
+							<option value="1">The Question Only</option>
+						</select>
+					</label>
+					<br>
+					<label>
+						REPRESENT ANSWER AS
+						<select th:field="*{answerAs}" class="broder br-16">
+							<option value="-1">The Answer Index Only</option>
+							<option value="0">The Answer And The Index</option>
+							<option value="1">The Answer Only</option>
+						</select>
+					</label>
+					<label>
+						<input type="checkbox" th:field="*{allCandidates}">
+						EXPORT ALL CANDIDATES
+					</label>
+					<br>
+					<label>
+						<input type="checkbox" th:field="*{showScore}">
+					</label>
+					<br>
+					<br>
+					<div class="flex-row justify-end">
+						<button type="submit" class="action-btn br-16">Configure</button>
+					</div>
 				</form>
 			</div>
 		</div>
 	</div>
+	<script>
+		window.addEventListener("DOMContentLoaded", () => {
+			snStr = document.getElementById("serialNumberStr")
+			console.log(snStr.value)
+		})
+	</script>
 </body>
 </html>
