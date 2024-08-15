@@ -19,7 +19,7 @@ Also go to [e-iceblue](https://www.e-iceblue.com/Download/doc-for-java-free.html
 6. Exporting the results of the exam should be a CSV file.
 	> Implemented
 7. Exporting of the results should be customizable.
-	> Inprogress
+	> Implemented
 8. Change the question numbers to be more visible on the exam page for examinees.
 	> Implemented
 9. Implement keyboard navigations for question and answer selections for examinees.
