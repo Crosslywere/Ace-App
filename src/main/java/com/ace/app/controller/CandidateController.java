@@ -190,7 +190,6 @@ public class CandidateController {
 	public String submit( ExamCandidateDTO candidateDTO, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null ) {
-			System.out.println( "Failed to get exam" );
 			return "redirect:/exam/select";
 		}
 		Candidate candidate = null;
