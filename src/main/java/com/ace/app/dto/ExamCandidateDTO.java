@@ -80,7 +80,7 @@ public class ExamCandidateDTO extends BaseCandidateDTO {
 		if ( currentPaperIndex == 0 && currentPaperQuestionNumber == 1 ) {
 			prevQuestionPath = null;
 		} else if ( currentPaperIndex > 0 && currentPaperQuestionNumber == 1 ) {
-			prevQuestionPath = paperNames.get( currentPaperIndex - 1 ) + "/" + currentPaper.getQuestionsPerCandidate();
+			prevQuestionPath = paperNames.get( currentPaperIndex - 1 ) + "/" + candidate.getPapers().get( currentPaperIndex - 1 ).getQuestionsPerCandidate();
 		} else {
 			prevQuestionPath = currentPaperName + "/" + ( currentPaperQuestionNumber - 1 );
 		}
