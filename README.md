@@ -36,3 +36,68 @@ Also go to [e-iceblue](https://www.e-iceblue.com/Download/doc-for-java-free.html
 
 ## HOW TO USE
 
+This application is a web based application, meaning you would be needing a browser to interact with it.
+(The design is strictly for desktop.)
+
+### INSTALL
+
+This application relies on [Java-21(LTS)](https://www.oracle.com/java/technologies/downloads/#java21) and [Docker](https://www.docker.com) to be fully utilized.
+
+Once Java has been installed, use the following command to compile the project for your particular operating system. (Note you will have to be in the projects directory in the shell program)
+
+#### Linux
+```bash
+./mvnw clean install
+```
+
+#### Windows
+```cmd
+.\mvnw.cmd clean install
+```
+
+Once this is completed you will then need to have Docker installed to set up the application fully.
+
+Do this by using the following command in your shell/command prompt application. (Note you will have to be in the projects directory in the shell program)
+
+#### To start the application
+```
+docker compose -f ./docker-compose.yaml up -d
+```
+
+#### To stop the application
+```
+docker compose -f ./docker-compose.yaml down
+```
+
+For configuring the applications enviroment please see [Docker Configuration](#docker-configuration)
+
+### Docker Configuration
+
+The application's is customizable via the projects docker-compose.yaml file.
+Here is a list of enviroment variable that can be customized before running the application
+
+- __*POSTGRES_DB*__ Specifies the name of the Postgres database. This must be the same as the end of __DB_URL__ in the *app* side. eg. jdbc:postgresql://app_db:5432/<*POSTGRES_DB | DB_URL*>
+
+- __*POSTGRES_USER*__ Specifies the username that the database should be created with. This must be the same as the __DB_USERNAME__ in the *app* side.
+
+- __*POSTGRES_PASSWORD*__ Specifies the password that the database should be created with. This must be the same as the __DB_PASSWORD__ in the *app* side.
+
+- __*DB_NAME*__ Specifies the database being used by the system. This should not be modified.
+
+- __*DB_URL*__ Specifies where the database is located on the host system. This should not be modified (only as specified above.)
+
+- __*DB_USERNAME*__ Specifies the username for the database so that the application can have access to the database. Must be the same as the __POSTGRES_USER__ in the *app_db* side.
+
+- __*DB_PASSWORD*__ Specifies the password for the database so that the application can have access to the database. Must be the same as the __POSTGRES_PASSWORD__ in the *app_db* side.
+
+- __*DB_DDL*__ Specifies how the database should handle entities in the application. This can be set to either 
+	* __"create"__ which creates a new table in the database for every entity.
+	* __"create-drop"__ creates a new table in the database for every entity but deletes the table upon exiting the application.
+	* __"update"__ updates the tables as necessary to match those of the entities upon starting the application.
+	* __"validate"__ validates that the database tables match the entities of the application. 
+
+- __*DB_DRIVER*__ Specifies the driver class for the database. This should not be modified.
+
+- __*DB_PLATFORM*__ Specifies the platform class for the database. This should not be modified.
+
+- __*ports*__ Specifies the port number to map to the in application port number. This does not need to be modified unless it is conflicting with another applications port number.
