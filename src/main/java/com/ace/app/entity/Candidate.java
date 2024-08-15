@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Candidate class represents a candidate that can write an exam.
+ * Candidate class represents a candidate that can take an exam.
  * 
  * @author Ogboru Jude
  * @version 0.0.1-SNAPSHOT
@@ -104,6 +104,13 @@ public class Candidate {
 			candidateId = new CandidateId();
 		}
 		candidateId.setField2( field );
+	}
+
+	public void setSubmitted( boolean submitted ) {
+		this.submitted = submitted;
+		if ( submitted ) {
+			hasLoggedIn = true;
+		}
 	}
 
 	public static void score( Candidate candidate ) {
