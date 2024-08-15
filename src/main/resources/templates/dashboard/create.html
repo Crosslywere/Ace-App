@@ -107,42 +107,44 @@
 		</div>
 	</div>
 	<script>
-		const slider = document.getElementById('cutOffMark');
-		const sliderVal = document.getElementById('pass-value');
-		sliderVal.innerHTML = (slider.value * 100) + '%';
-		slider.addEventListener('change', () => {
+		window.addEventListener("DOMContentLoaded", () => {
+			const slider = document.getElementById('cutOffMark');
+			const sliderVal = document.getElementById('pass-value');
 			sliderVal.innerHTML = (slider.value * 100) + '%';
-		});
-		const allowCutOffMark = document.querySelector('[name=allowCutOffMark]');
-		if (allowCutOffMark) {
-			document.getElementById("slider").hidden = !allowCutOffMark.checked;
-			allowCutOffMark.addEventListener("change", () => {
-				document.getElementById("slider").hidden = !allowCutOffMark.checked;
+			slider.addEventListener('change', () => {
+				sliderVal.innerHTML = (slider.value * 100) + '%';
 			});
-		}
-		// Perform validation
-		const paperInput = document.getElementById("paperDocument");
-		const paperLabel = document.querySelector("#paperDocument ~ label");
-		const submitBtn = document.querySelector('h2 ~ form button[type="submit"]');
-		const validateExam = () => {
-			if (paperInput.files.length == 0) {
-				return;
+			const allowCutOffMark = document.querySelector('[name=allowCutOffMark]');
+			if (allowCutOffMark) {
+				document.getElementById("slider").hidden = !allowCutOffMark.checked;
+				allowCutOffMark.addEventListener("change", () => {
+					document.getElementById("slider").hidden = !allowCutOffMark.checked;
+				});
 			}
-			const maxFileSize = 1024 * 512; // 512KB
-			if (paperInput.files[0].size <= maxFileSize) {
-				paperLabel.classList.add("success-upload");
-				paperLabel.classList.remove("fail-upload");
-				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + '</h3>';
-				submitBtn.disabled = false;
-			} else {
-				paperLabel.classList.add("fail-upload");
-				paperLabel.classList.remove("success-upload");
-				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + ' is too large</h3>';
-				submitBtn.disabled = true;
+			// Perform validation
+			const paperInput = document.getElementById("paperDocument");
+			const paperLabel = document.querySelector("#paperDocument ~ label");
+			const submitBtn = document.querySelector('h2 ~ form button[type="submit"]');
+			const validateExam = () => {
+				if (paperInput.files.length == 0) {
+					return;
+				}
+				const maxFileSize = 1024 * 512; // 512KB
+				if (paperInput.files[0].size <= maxFileSize) {
+					paperLabel.classList.add("success-upload");
+					paperLabel.classList.remove("fail-upload");
+					paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + '</h3>';
+					submitBtn.disabled = false;
+				} else {
+					paperLabel.classList.add("fail-upload");
+					paperLabel.classList.remove("success-upload");
+					paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + ' is too large</h3>';
+					submitBtn.disabled = true;
+				}
 			}
-		}
-		paperInput.onchange = validateExam;
-		validateExam();
+			paperInput.onchange = validateExam;
+			validateExam();
+		})
 	</script>
 </body>
 </html>

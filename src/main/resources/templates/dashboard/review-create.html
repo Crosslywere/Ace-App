@@ -193,110 +193,112 @@
 		</div>
 	</div>
 	<script>
-		// CutOff mark modification
-		const slider = document.getElementById('cutOffMark');
-		const sliderVal = document.getElementById('pass-value');
-		sliderVal.innerHTML = (slider.value * 100) + '%';
-		slider.addEventListener('change', () => {
+		window.addEventListener("DOMContentLoaded", () => {
+			// CutOff mark modification
+			const slider = document.getElementById('cutOffMark');
+			const sliderVal = document.getElementById('pass-value');
 			sliderVal.innerHTML = (slider.value * 100) + '%';
-		});
-		const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
-		if (allowCutOffMark) {
-			document.getElementById('slider').hidden = !allowCutOffMark.checked;
-			allowCutOffMark.addEventListener("change", () => {
-				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			slider.addEventListener('change', () => {
+				sliderVal.innerHTML = (slider.value * 100) + '%';
 			});
-		}
-		
-		// Login field
-		const loginField2 = document.getElementById('loginField2');
-		const loginField2Desc = document.getElementById('loginField2Desc');
-		const validateLoginField = () => {
-			if (loginField2.value == 'None') {
-				loginField2Desc.required = false;
-			} else {
-				loginField2Desc.required = true;
+			const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
+			if (allowCutOffMark) {
+				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+				allowCutOffMark.addEventListener("change", () => {
+					document.getElementById('slider').hidden = !allowCutOffMark.checked;
+				});
 			}
-		}
-		loginField2.onchange = validateLoginField;
-		validateLoginField();
-
-		// Candidate list verification/validation
-		const candidateUploadLabel = document.getElementById('upload-candidates');
-		const candidateUploadBox = candidateUploadLabel.getElementsByTagName('label')[0];
-		const candidateUploadInput = candidateUploadLabel.getElementsByTagName('input')[0];
-		const candidateList = document.getElementById('candidate-details');
-		const uploadCandidatesBtn = document.getElementById('upload-candidates-btn');
-		const deleteCandidatesBtn = document.getElementById('delete-candidates-btn');
-		const verifyCandidates = () => {
-			// If the candidate list is not hidden
-			if (candidateList && !candidateList.hidden) {
-				// If delete candidates button is available
-				if (deleteCandidatesBtn) {
-					// disable and hide the upload candidates button
-					uploadCandidatesBtn.hidden = true;
-					uploadCandidatesBtn.disabled = true;
-					candidateUploadLabel.hidden = true;
-					// unhide the delete candidates button
-					deleteCandidatesBtn.hidden = false;
+			
+			// Login field
+			const loginField2 = document.getElementById('loginField2');
+			const loginField2Desc = document.getElementById('loginField2Desc');
+			const validateLoginField = () => {
+				if (loginField2.value == 'None') {
+					loginField2Desc.required = false;
+				} else {
+					loginField2Desc.required = true;
 				}
-				return;
 			}
-			// If the candidate list is hidden
-			if (candidateList && candidateList.hidden) {
-				if (deleteCandidatesBtn) {
-					uploadCandidatesBtn.hidden = false;
-					uploadCandidatesBtn.disabled = false;
-					candidateUploadLabel.hidden = false;
-					deleteCandidatesBtn.hidden = true;
+			loginField2.onchange = validateLoginField;
+			validateLoginField();
+			
+			// Candidate list verification/validation
+			const candidateUploadLabel = document.getElementById('upload-candidates');
+			const candidateUploadBox = candidateUploadLabel.getElementsByTagName('label')[0];
+			const candidateUploadInput = candidateUploadLabel.getElementsByTagName('input')[0];
+			const candidateList = document.getElementById('candidate-details');
+			const uploadCandidatesBtn = document.getElementById('upload-candidates-btn');
+			const deleteCandidatesBtn = document.getElementById('delete-candidates-btn');
+			const verifyCandidates = () => {
+				// If the candidate list is not hidden
+				if (candidateList && !candidateList.hidden) {
+					// If delete candidates button is available
+					if (deleteCandidatesBtn) {
+						// disable and hide the upload candidates button
+						uploadCandidatesBtn.hidden = true;
+						uploadCandidatesBtn.disabled = true;
+						candidateUploadLabel.hidden = true;
+						// unhide the delete candidates button
+						deleteCandidatesBtn.hidden = false;
+					}
+					return;
 				}
-				return;
+				// If the candidate list is hidden
+				if (candidateList && candidateList.hidden) {
+					if (deleteCandidatesBtn) {
+						uploadCandidatesBtn.hidden = false;
+						uploadCandidatesBtn.disabled = false;
+						candidateUploadLabel.hidden = false;
+						deleteCandidatesBtn.hidden = true;
+					}
+					return;
+				}
 			}
-		}
-		verifyCandidates();
-		const deleteCandidatesList = (event) => {
-			event.preventDefault();
-			candidateUploadLabel.hidden = false;
-			uploadCandidatesBtn.hidden = false;
-			uploadCandidatesBtn.disabled = true;
-			uploadCandidatesBtn.classList.add('action-btn');
-			deleteCandidatesBtn.classList.remove('alt-danger-btn');
-			deleteCandidatesBtn.hidden = true;
-			candidateList.innerHTML = "";
-			candidateList.hidden = true;
 			verifyCandidates();
-		}
-		if (deleteCandidatesBtn) {
-			deleteCandidatesBtn.onclick = deleteCandidatesList;
-		}
-		const validateCandidates = () => {
-			const maxFileSize = 1024 * 512; // 512KB
-			if (candidateUploadInput.files.length > 0 && candidateUploadInput.files[0].size <= maxFileSize) {
-				candidateUploadBox.classList.add('success-upload');
-				candidateUploadBox.classList.remove('fail-upload');
-				candidateUploadBox.innerHTML = "<h3>" + candidateUploadInput.files[0].name + "</h3>";
-				uploadCandidatesBtn.disabled = false;
-				return;
-			}
-			if (candidateUploadInput.files.length > 0 && candidateUploadInput.files[0].size > maxFileSize) {
-				candidateUploadBox.classList.add('fail-upload');
-				candidateUploadBox.classList.remove('success-upload');
-				candidateUploadBox.innerHTML = "<h3>" + candidateUploadInput.files[0].name + " is too large.</h3>";
+			const deleteCandidatesList = (event) => {
+				event.preventDefault();
+				candidateUploadLabel.hidden = false;
+				uploadCandidatesBtn.hidden = false;
 				uploadCandidatesBtn.disabled = true;
-				return;
+				uploadCandidatesBtn.classList.add('action-btn');
+				deleteCandidatesBtn.classList.remove('alt-danger-btn');
+				deleteCandidatesBtn.hidden = true;
+				candidateList.innerHTML = "";
+				candidateList.hidden = true;
+				verifyCandidates();
 			}
-			if (candidateUploadInput.files.length == 0) {
-				uploadCandidatesBtn.disabled = true;
+			if (deleteCandidatesBtn) {
+				deleteCandidatesBtn.onclick = deleteCandidatesList;
 			}
-		}
-		validateCandidates();
-		candidateUploadInput.onchange = validateCandidates;
-		uploadCandidatesBtn.addEventListener("click", () => {
-			if (uploadCandidatesBtn.disabled)
-				return;
-			document.getElementById('loginField1Desc').required = false;
-			document.getElementById('loginField2Desc').required = false;
-		});
+			const validateCandidates = () => {
+				const maxFileSize = 1024 * 512; // 512KB
+				if (candidateUploadInput.files.length > 0 && candidateUploadInput.files[0].size <= maxFileSize) {
+					candidateUploadBox.classList.add('success-upload');
+					candidateUploadBox.classList.remove('fail-upload');
+					candidateUploadBox.innerHTML = "<h3>" + candidateUploadInput.files[0].name + "</h3>";
+					uploadCandidatesBtn.disabled = false;
+					return;
+				}
+				if (candidateUploadInput.files.length > 0 && candidateUploadInput.files[0].size > maxFileSize) {
+					candidateUploadBox.classList.add('fail-upload');
+					candidateUploadBox.classList.remove('success-upload');
+					candidateUploadBox.innerHTML = "<h3>" + candidateUploadInput.files[0].name + " is too large.</h3>";
+					uploadCandidatesBtn.disabled = true;
+					return;
+				}
+				if (candidateUploadInput.files.length == 0) {
+					uploadCandidatesBtn.disabled = true;
+				}
+			}
+			validateCandidates();
+			candidateUploadInput.onchange = validateCandidates;
+			uploadCandidatesBtn.addEventListener("click", () => {
+				if (uploadCandidatesBtn.disabled)
+					return;
+				document.getElementById('loginField1Desc').required = false;
+				document.getElementById('loginField2Desc').required = false;
+			});
+		})
 	</script>
 </body>
 </html>

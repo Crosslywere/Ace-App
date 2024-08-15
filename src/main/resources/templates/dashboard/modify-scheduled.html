@@ -243,74 +243,76 @@
 		</div>
 	</div>
 	<script>
-		// CutOff mark modification
-		const slider = document.getElementById('cutOffMark');
-		const sliderVal = document.getElementById('pass-value');
-		sliderVal.innerHTML = (slider.value * 100) + '%';
-		slider.addEventListener('change', () => {
+		window.addEventListener("DOMContentLoaded", () => {
+			// CutOff mark modification
+			const slider = document.getElementById('cutOffMark');
+			const sliderVal = document.getElementById('pass-value');
 			sliderVal.innerHTML = (slider.value * 100) + '%';
-		});
-		const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
-		if (allowCutOffMark) {
-			document.getElementById('slider').hidden = !allowCutOffMark.checked;
-			allowCutOffMark.addEventListener("change", () => {
-				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+			slider.addEventListener('change', () => {
+				sliderVal.innerHTML = (slider.value * 100) + '%';
 			});
-		}
-		// Perform paper validation
-		const paperInput = document.getElementById("paperDocument");
-		const paperLabel = document.querySelector("#paperDocument ~ label");
-		const validateExam = () => {
-			if (paperInput.files.length == 0) {
-				return;
+			const allowCutOffMark = document.querySelector('[name="allowCutOffMark"]');
+			if (allowCutOffMark) {
+				document.getElementById('slider').hidden = !allowCutOffMark.checked;
+				allowCutOffMark.addEventListener("change", () => {
+					document.getElementById('slider').hidden = !allowCutOffMark.checked;
+				});
 			}
-			const maxFileSize = 1024 * 512; // 512KB
-			if (paperInput.files[0].size <= maxFileSize) {
-				paperLabel.classList.add("success-upload");
-				paperLabel.classList.remove("fail-upload");
-				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + '</h3>';
-			} else {
-				paperLabel.classList.add("fail-upload");
-				paperLabel.classList.remove("success-upload");
-				paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + ' is too large</h3>';
+			// Perform paper validation
+			const paperInput = document.getElementById("paperDocument");
+			const paperLabel = document.querySelector("#paperDocument ~ label");
+			const validateExam = () => {
+				if (paperInput.files.length == 0) {
+					return;
+				}
+				const maxFileSize = 1024 * 512; // 512KB
+				if (paperInput.files[0].size <= maxFileSize) {
+					paperLabel.classList.add("success-upload");
+					paperLabel.classList.remove("fail-upload");
+					paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + '</h3>';
+				} else {
+					paperLabel.classList.add("fail-upload");
+					paperLabel.classList.remove("success-upload");
+					paperLabel.innerHTML = '<h3>' + paperInput.files[0].name + ' is too large</h3>';
+				}
 			}
-		}
-		paperInput.onchange = validateExam;
-		validateExam();
+			paperInput.onchange = validateExam;
+			validateExam();
 
-		// Validate candidates upload list
-		const candidateInput = document.getElementById("candidateLoginInfoDocument");
-		const candidateLabel = document.querySelector("#candidateLoginInfoDocument ~ label");
-		const validateCandidates = () => {
-			if (candidateInput.files.length == 0) {
-				return;
+			// Validate candidates upload list
+			const candidateInput = document.getElementById("candidateLoginInfoDocument");
+			const candidateLabel = document.querySelector("#candidateLoginInfoDocument ~ label");
+			const validateCandidates = () => {
+				if (candidateInput.files.length == 0) {
+					return;
+				}
+				const maxFileSize = 1024 * 512;
+				if (candidateInput.files[0].size <= maxFileSize) {
+					candidateLabel.classList.add("success-upload");
+					candidateLabel.classList.remove("fail-upload");
+					candidateLabel.innerHTML = '<h3>' + candidateInput.files[0].name + '</h3>';
+				} else {
+					candidateLabel.classList.add("fail-upload");
+					candidateLabel.classList.remove("success-upload");
+					candidateLabel.innerHTML = '<h3>' + candidateLabel.files[0].name + ' is too large</h3>';
+				}
 			}
-			const maxFileSize = 1024 * 512;
-			if (candidateInput.files[0].size <= maxFileSize) {
-				candidateLabel.classList.add("success-upload");
-				candidateLabel.classList.remove("fail-upload");
-				candidateLabel.innerHTML = '<h3>' + candidateInput.files[0].name + '</h3>';
-			} else {
-				candidateLabel.classList.add("fail-upload");
-				candidateLabel.classList.remove("success-upload");
-				candidateLabel.innerHTML = '<h3>' + candidateLabel.files[0].name + ' is too large</h3>';
-			}
-		}
-		candidateInput.onchange = validateCandidates;
-		validateCandidates();
+			candidateInput.onchange = validateCandidates;
+			validateCandidates();
 
-		// Validate candidate fields
-		const field1 = document.getElementById("loginField1");
-		const field1Desc = document.getElementById("loginField1Desc");
-		const field2 = document.getElementById("loginField2");
-		const field2Desc = document.getElementById("loginField2Desc");
-		const validateCandidateFields = () => {
-			field1Desc.required = !(field1.value === "None");
-			field2Desc.required = !(field2.value === "None");
-		}
-		field1.onchange = validateCandidateFields;
-		field2.onchange = validateCandidateFields;
-		validateCandidateFields();
+			// Validate candidate fields
+			const field1 = document.getElementById("loginField1");
+			const field1Desc = document.getElementById("loginField1Desc");
+			const field2 = document.getElementById("loginField2");
+			const field2Desc = document.getElementById("loginField2Desc");
+			const validateCandidateFields = () => {
+				field1Desc.required = !(field1.value === "None");
+				field2Desc.required = !(field2.value === "None");
+			}
+			field1.onchange = validateCandidateFields;
+			field2.onchange = validateCandidateFields;
+			validateCandidateFields();
+		})
 	</script>
 </body>
 </html>
