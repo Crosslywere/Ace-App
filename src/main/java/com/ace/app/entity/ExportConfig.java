@@ -130,6 +130,9 @@ public class ExportConfig {
 					}
 				}
 				if ( showScore ) {
+					if ( candidate.getScore() < 0 ) {
+						Candidate.score( candidate );
+					}
 					body += "," + candidate.getScore() + "/" + maxScore;
 				}
 			}

@@ -54,6 +54,12 @@ public class ExamServiceImpl implements ExamService {
 		} else if ( exam.getScheduledDate().compareTo( today ) < 0 || ( exam.getScheduledDate().compareTo( today ) == 0
 				&& exam.getEndTime().compareTo( now ) <= 0 ) ) {
 			exam.setState( ExamState.Recorded );
+			for ( Candidate candidate : exam.getCandidates() ) {
+				if ( candidate.getHasLoggedIn() ) {
+					candidate.setSubmitted( true );
+					Candidate.score( candidate );
+				}
+			}
 			examsToUpdate.add( exam );
 		}
 	}
