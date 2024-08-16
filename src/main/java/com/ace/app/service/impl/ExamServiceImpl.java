@@ -14,6 +14,7 @@ import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
+import com.ace.app.model.CandidateField;
 import com.ace.app.model.ExamState;
 import com.ace.app.model.ModifyTodo;
 import com.ace.app.repository.ExamRepository;
@@ -111,6 +112,12 @@ public class ExamServiceImpl implements ExamService {
 			// Or could otherwise be overwritten causing an error
 			System.out.println( "Use update exam. Attempted to create exam with exam Id = " + examDTO.getExamId() );
 			return false;
+		}
+		// Remove the extra login field that is not desired
+		if ( examDTO.getLoginField2() == CandidateField.None ) {
+			for ( var candidate : examDTO.getCandidates() ) {
+				candidate.setField2( "" );
+			}
 		}
 		examRepository.save( new Exam( examDTO ) );
 		return true;
