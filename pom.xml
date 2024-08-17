@@ -16,6 +16,12 @@
 	<properties>
 		<java.version>21</java.version>
 	</properties>
+	<developers>
+		<developer>
+			<email>ogboruj@gmail.com</email>
+			<name>Ogboru Jude</name>
+		</developer>
+	</developers>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
