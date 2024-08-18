@@ -25,7 +25,6 @@ services:
       DB_PASSWORD: replace_password #Should be the same as the POSTGRES_PASSWORD
       DB_DDL: update #Should be either create, create-drop, update, validate. Defaults to create but should be set to validate after first run
       DB_DRIVER: org.postgresql.Driver #For the application to know the driver class
-      DB_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
     depends_on:
       - app_db
     restart: always
