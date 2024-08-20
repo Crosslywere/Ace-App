@@ -25,6 +25,13 @@ services:
       DB_PASSWORD: replace_password #Should be the same as the POSTGRES_PASSWORD
       DB_DDL: update #Should be either create, create-drop, update, validate. Defaults to create but should be set to validate after first run
       DB_DRIVER: org.postgresql.Driver #For the application to know the driver class
+      # Enviroment variables to specify Twilio SMS service https://console.twilio.com
+      TWILIO_NO: '+01234567890' # Can be retrieved from https://console.twilio.com
+      TWILIO_SID: Twilio SID # Can be retrieved from https://console.twilio.com
+      TWILIO_AUTH: '***********' # Can be retrieved from https://console.twilio.com
+      # Enviroment variables to specify emailing
+      EMAIL_ADDRESS: example@gmail.com # The company email that should be used to send emails
+      EMAIL_PASSWORD: app password # The app password provided from this url: https://myaccount.google.com/apppasswords
     depends_on:
       - app_db
     restart: always
