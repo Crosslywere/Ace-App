@@ -12,5 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreateCandidateDTO extends BaseCandidateDTO {
-
+	private String email;
+	private String phoneNumber;
+	private Boolean notified;
 }

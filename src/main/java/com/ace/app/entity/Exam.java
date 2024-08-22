@@ -114,7 +114,11 @@ public class Exam {
 		} );
 		candidates = new ArrayList<>();
 		examDTO.getCandidates().forEach( candidateDTO -> {
-			candidates.add( new Candidate( candidateDTO, this ) );
+			Candidate candidate = new Candidate( candidateDTO, this );
+			candidate.setEmail( candidateDTO.getEmail() );
+			candidate.setPhoneNumber( candidateDTO.getPhoneNumber() );
+			candidate.setNotified( candidateDTO.getNotified() );
+			candidates.add( candidate );
 		} );
 		registrationLocked = !candidates.isEmpty();
 	}
@@ -146,7 +150,11 @@ public class Exam {
 		candidates = new ArrayList<>();
 		// Adding all the candidates be it modified or created
 		examDTO.getCandidates().forEach( candidateDTO -> {
-			candidates.add( new Candidate( candidateDTO, this ) );
+			Candidate candidate = new Candidate( candidateDTO, this );
+			candidate.setEmail( candidateDTO.getEmail() );
+			candidate.setPhoneNumber( candidateDTO.getPhoneNumber() );
+			candidate.setNotified( candidateDTO.getNotified() );
+			candidates.add( candidate );
 		} );
 		examDTO.getModifyCandidates().forEach( candidateDTO -> {
 			candidates.add( new Candidate( candidateDTO, this ) );

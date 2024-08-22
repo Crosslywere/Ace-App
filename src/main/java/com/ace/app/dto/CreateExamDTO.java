@@ -229,6 +229,8 @@ public class CreateExamDTO extends BaseExamDTO {
 		List<CreateCandidateDTO> candidates = new ArrayList<>();
 		boolean firstLine = true;
 		boolean singleColumn = false;
+		int emailIndex = -1;
+		int phoneNumberIndex = -1;
 		while ( scanner.hasNextLine() ) {
 			String line = scanner.nextLine();
 			if ( line.matches( "^Evaluation Warning: The document was created with Spire\\.Doc for JAVA\\.$" ) ) {
@@ -245,6 +247,15 @@ public class CreateExamDTO extends BaseExamDTO {
 					// scanner.close();
 					// return candidates;
 					continue;
+				}
+				// Getting the email and phonenumber indices
+				for ( String col : columnHeads ) {
+					if ( col.matches( "^[\\S\\s]*[Mm][Aa][Ii][Ll][\\S\\s]*$" ) ) {
+						emailIndex = columnHeads.indexOf( col );
+					}
+					if ( col.matches( "^[\\S\\s]*[Pp][Hh][Oo][Nn][Ee][\\S\\s]*$" ) ) {
+						phoneNumberIndex = columnHeads.indexOf( col );
+					}
 				}
 				if ( columnHeads.size() == 1 ) {
 					singleColumn = true;
@@ -315,16 +326,26 @@ public class CreateExamDTO extends BaseExamDTO {
 					CreateCandidateDTO candidate = new CreateCandidateDTO();
 					String str = line.replaceAll( "^\\\"", "" ).replaceAll( "\\\"\\s*[,]*\\s*$", "" ).trim();
 					candidate.setField1( str );
+					if ( emailIndex == 0 ) {
+						candidate.setEmail( str );
+					} else if ( phoneNumberIndex == 0 ) {
+						candidate.setPhoneNumber( str );
+					}
 					candidates.add( candidate );
 				} else {
 					CreateCandidateDTO candidate = new CreateCandidateDTO();
 					List<String> data = parseCSVLine( line );
 					if ( data.size() > 1 ) {
-						
 						candidate.setField1( data.get( 0 ) );
 						candidate.setField2( data.get( 1 ) );
 					} else {
 						candidate.setField1( data.get( 0 ) );
+					}
+					if ( emailIndex >= 0 && data.size() > emailIndex ) {
+						candidate.setEmail( data.get( emailIndex ) );
+					}
+					if ( phoneNumberIndex >= 0 && data.size() > phoneNumberIndex ) {
+						candidate.setPhoneNumber( data.get( phoneNumberIndex ) );
 					}
 					candidates.add( candidate );
 				}

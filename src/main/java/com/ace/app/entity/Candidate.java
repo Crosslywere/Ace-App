@@ -54,6 +54,12 @@ public class Candidate {
 	@OneToMany( cascade = CascadeType.ALL, orphanRemoval = true )
 	private List<CandidateQuestionAnswerMapper> answerMapper;
 
+	private String email;
+
+	private String phoneNumber;
+
+	private Boolean notified = false;
+
 	public Candidate( BaseCandidateDTO candidateDTO, Exam exam ) {
 		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
 	}
