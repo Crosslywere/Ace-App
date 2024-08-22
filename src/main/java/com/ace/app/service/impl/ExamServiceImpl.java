@@ -173,6 +173,7 @@ public class ExamServiceImpl implements ExamService {
 		}
 		Exam oldExam = examRepository.findById( examDTO.getExamId() ).orElse( null );
 		if ( oldExam != null ) {
+			final BooleanWrapper timeChanged = new BooleanWrapper();
 			boolean shouldSave = false;
 			Exam replacement = new Exam( examDTO );
 			today = Date.valueOf( new Date( System.currentTimeMillis() ).toString() );
@@ -182,14 +183,17 @@ public class ExamServiceImpl implements ExamService {
 			}
 			if ( !replacement.getScheduledDate().equals( oldExam.getScheduledDate() ) && replacement.getScheduledDate().compareTo( today ) > -1 ) {
 				oldExam.setScheduledDate( replacement.getScheduledDate() );
+				timeChanged.setValue( true );
 				shouldSave = true;
 			}
 			if ( !replacement.getStartTime().equals( oldExam.getStartTime() ) ) {
 				oldExam.setStartTime( replacement.getStartTime() );
+				timeChanged.setValue( true );
 				shouldSave = true;
 			}
 			if ( !replacement.getEndTime().equals( oldExam.getEndTime() ) ) {
 				oldExam.setEndTime( replacement.getEndTime() );
+				timeChanged.setValue( true );
 				shouldSave = true;
 			}
 			updateExamState( oldExam );
@@ -265,7 +269,8 @@ public class ExamServiceImpl implements ExamService {
 					for ( int i = 0; i < oldExam.getCandidates().size(); i++ ) {
 						if ( oldExam.getCandidates().get( i ).getField1().equals( candidate.getField1() ) ) {
 							if ( !candidate.getEmail().equals( oldExam.getCandidates().get( i ).getEmail() ) || 
-								 !candidate.getPhoneNumber().equals( oldExam.getCandidates().get( i ).getPhoneNumber() ) )  {
+								 !candidate.getPhoneNumber().equals( oldExam.getCandidates().get( i ).getPhoneNumber() ) ||
+								 !timeChanged.getValue() )  {
 								boolean notified = senderService.sendMail( candidate );
 								if ( !notified ) {
 									candidate.setNotified( senderService.sendSMS( candidate ) );
@@ -344,6 +349,19 @@ public class ExamServiceImpl implements ExamService {
 			updateExamState( oldExam );
 			cleanup();
 			examRepository.save( oldExam );
+		}
+	}
+
+	// Helper class that is needed to make booleans final/static while being modifiable or scoped to a none static method
+	private class BooleanWrapper {
+		private boolean value = false;
+
+		public boolean getValue() {
+			return value;
+		}
+
+		public void setValue( boolean value ) {
+			this.value = value;
 		}
 	}
 }
