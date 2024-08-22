@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ace.app.dto.CreateCandidateDTO;
 import com.ace.app.dto.CreateExamDTO;
 import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
@@ -19,16 +20,23 @@ import com.ace.app.model.ExamState;
 import com.ace.app.model.ModifyTodo;
 import com.ace.app.repository.ExamRepository;
 import com.ace.app.service.ExamService;
+import com.ace.app.service.NotificationSenderService;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Ogboru Jude
  * @version 0.0.1-SNAPSHOT
  */
 @Service
+@Slf4j
 public class ExamServiceImpl implements ExamService {
 
 	@Autowired
 	private ExamRepository examRepository;
+
+	@Autowired
+	private NotificationSenderService senderService;
 
 	private static Date today = null;
 	
@@ -119,10 +127,17 @@ public class ExamServiceImpl implements ExamService {
 			System.out.println( "Use update exam. Attempted to create exam with exam Id = " + examDTO.getExamId() );
 			return false;
 		}
-		// Remove the extra login field that is not desired
-		if ( examDTO.getLoginField2() == CandidateField.None ) {
-			for ( var candidate : examDTO.getCandidates() ) {
+		for ( CreateCandidateDTO candidate : examDTO.getCandidates() ) {
+			// Remove the extra login field that is not desired
+			if ( examDTO.getLoginField2() == CandidateField.None ) {
 				candidate.setField2( "" );
+			}
+			// Sending notifying email
+			if ( candidate.getEmail() != null && !candidate.getEmail().isBlank() ) {
+				boolean notified = senderService.sendMail( candidate, examDTO );
+				if ( !notified ) {
+					candidate.setNotified( senderService.sendSMS( candidate, examDTO ) );
+				}
 			}
 		}
 		examRepository.save( new Exam( examDTO ) );
@@ -246,8 +261,17 @@ public class ExamServiceImpl implements ExamService {
 				}
 				replacement.getCandidates().forEach( candidate -> {
 					boolean handled = false;
+					boolean notificationHandled = false;
 					for ( int i = 0; i < oldExam.getCandidates().size(); i++ ) {
 						if ( oldExam.getCandidates().get( i ).getField1().equals( candidate.getField1() ) ) {
+							if ( !candidate.getEmail().equals( oldExam.getCandidates().get( i ).getEmail() ) || 
+								 !candidate.getPhoneNumber().equals( oldExam.getCandidates().get( i ).getPhoneNumber() ) )  {
+								boolean notified = senderService.sendMail( candidate );
+								if ( !notified ) {
+									candidate.setNotified( senderService.sendSMS( candidate ) );
+								}
+								notificationHandled = true;
+							}
 							oldExam.getCandidates().set( i, candidate );
 							handled = true;
 							break;
@@ -255,6 +279,9 @@ public class ExamServiceImpl implements ExamService {
 					}
 					if ( !handled ) {
 						oldExam.getCandidates().add( candidate );
+					}
+					if ( !notificationHandled ) {
+						senderService.sendMail( candidate );
 					}
 				} );
 				oldExam.setRegistrationLocked( !oldExam.getCandidates().isEmpty() );
