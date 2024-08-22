@@ -178,6 +178,8 @@
 											<span th:text="${candidate.field2}"></span>
 											<input type="text" th:field="*{candidates[__${candidateStat.index}__].field2}" hidden>
 										</td>
+										<input type="email" th:field="*{candidates[__${candidateStat.index}__].email}" hidden>
+										<input type="tel" th:field="*{candidates[__${candidateStat.index}__].phoneNumber}" hidden>
 									</tr>
 								</tbody>
 							</table>
