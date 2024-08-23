@@ -138,6 +138,7 @@ public class DashboardController {
 				return "redirect:/advanced-search";
 			}
 			List<Exam> exams = examService.getExamsByTitleLike( search );
+			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			model.addAttribute( "results", exams );
 			return "dashboard/search";
 		}
@@ -323,6 +324,7 @@ public class DashboardController {
 		if ( isLocalhost( request ) ) {
 			Exam exam = examService.getExamById( examDTO.getExamId() ).orElse( null );
 			if ( exam != null && exam.getState() == ExamState.Ongoing ) {
+				model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 				model.addAttribute( "exam", examDTO );
 				return "dashboard/review-modify-ongoing";
 			}
