@@ -60,6 +60,10 @@ public class Candidate {
 
 	private Boolean notified = false;
 
+	private Byte rating = -1;
+
+	private String comment = "";
+
 	public Candidate( BaseCandidateDTO candidateDTO, Exam exam ) {
 		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
 	}
