@@ -67,9 +67,9 @@
 			form="question-form">Paper</button>
 		</th:block>
 		<button form="question-form" class="exam-paper" type="submit" th:formaction="@{/exam/submit}">Submit</button>
-		<input form="question-form" type="number" th:field="${candidate.examId}" hidden>
+		<!-- <input form="question-form" type="number" th:field="${candidate.examId}" hidden>
 		<input form="question-form" type="text" th:field="${candidate.field1}" hidden>
-		<input form="question-form" type="text" th:field="${candidate.field2}" hidden>
+		<input form="question-form" type="text" th:field="${candidate.field2}" hidden> -->
 		<input form="question-form" type="number" th:field="${candidate.currentPaperQuestionNumber}" hidden>
 		<input form="question-form" type="number" th:field="${candidate.timeUsed}" hidden>
 		<input form="question-form" type="text" th:field="${candidate.currentPaperName}" hidden>

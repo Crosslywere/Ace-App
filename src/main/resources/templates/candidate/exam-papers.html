@@ -32,9 +32,6 @@
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
 	</div>
 	<form th:action="@{/exam/validate}" th:object="${candidate}" method="post" class="container">
-		<input type="number" th:field="*{examId}" hidden>
-		<input type="text" th:field="*{field1}" hidden>
-		<input type="text" th:field="*{field2}" hidden>
 		<h2 class="text-center">Select Papers</h2>
 		<p style="text-align:center" th:text="|Please Select ${exam.papersPerCandidate} Paper${exam.papersPerCandidate > 1 ? 's':''} Only|"></p>
 		<div class="flex-row flex-wrap justify-center">
