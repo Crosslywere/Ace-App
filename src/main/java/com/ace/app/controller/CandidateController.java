@@ -152,7 +152,6 @@ public class CandidateController {
 	 * @param model Used to pass arguments to the template
 	 * @return The exam question template for the selected exam
 	 */
-	// todo retrieve reset
 	@PostMapping( "/exam/{paper}/{number}" )
 	public String getQuestion( @PathVariable( "paper" ) String paperName, @PathVariable( "number" ) Integer number, ExamCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
 		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
@@ -202,7 +201,6 @@ public class CandidateController {
 	 * @param model Used to pass arguments to the template
 	 * @return The template for a submitted candidate
 	 */
-	// todo retreive reset
 	@PostMapping( "/exam/submitted" )
 	public String submit( ExamCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
 		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
@@ -225,10 +223,11 @@ public class CandidateController {
 
 	// TODO implement
 	@PostMapping( "/exam/rate" )
-	public String rate( ExamCandidateRateDTO candidateDTO, Model model ) {
+	public String rate( ExamCandidateRateDTO candidateDTO, HttpServletRequest request, Model model ) {
+		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null ) {
-
+			return "redirect:/exam/select";
 		}
 		return "";
 	}
@@ -252,8 +251,12 @@ public class CandidateController {
 					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
 				}
 				case PAPER_SELECT -> {
+					var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
+					examIdCookie.setPath( "/" );
+					examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
+					examIdCookie.setHttpOnly( true );
+					response.addCookie( examIdCookie );
 					insertCookies( response, candidateDTO );
-					// TODO add paper select cookies
 					model.addAttribute( "candidate", candidateDTO );
 					model.addAttribute( "exam", exam );
 				}
@@ -261,8 +264,11 @@ public class CandidateController {
 					if ( exam == null ) {
 						return "redirect:/exam";
 					}
-					resetCookies( response );
-
+					var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
+					examIdCookie.setPath( "/" );
+					examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
+					examIdCookie.setHttpOnly( true );
+					response.addCookie( examIdCookie );
 					model.addAttribute( "field1", exam.getLoginField1() );
 					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
 					model.addAttribute( "field2", exam.getLoginField2() );
@@ -344,7 +350,7 @@ public class CandidateController {
 	}
 
 	/**
-	 * 
+	 * Retrieve the candidate's login details and places them into the candidateDTO, while also returning the examId
 	 * @param <DTO> A class that extends the {@code BaseCandidateDTO} class
 	 * @param request The request to extract the cookies from
 	 * @param candidateDTO The candidate to place the details into
