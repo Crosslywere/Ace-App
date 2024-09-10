@@ -20,6 +20,10 @@ import com.twilio.type.PhoneNumber;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author Jude Ogboru
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @Slf4j
 public class NotificationSenderServiceImpl implements NotificationSenderService {
