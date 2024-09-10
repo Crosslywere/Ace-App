@@ -358,6 +358,9 @@ public class CandidateController {
 	 */
 	private <DTO extends BaseCandidateDTO> Long retriveCookiesIntoCandidate( HttpServletRequest request, DTO candidateDTO ) {
 		Long examId = 0L;
+		if (request.getCookies().length == 0) {
+			return examId;
+		}
 		for ( var cookie : request.getCookies() ) {
 			if ( cookie.getName().equals( COOKIE_NAMES[0] ) ) {
 				examId = Long.valueOf( cookie.getValue() );
