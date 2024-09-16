@@ -5,8 +5,8 @@ services:
     container_name: postgres-db
     image: postgres:latest
     environment:
-      POSTGRES_DB: ace_exam_platform
-      POSTGRES_USER: ace
+      POSTGRES_DB: ace_exam_platform #Can be changed but not after deployment
+      POSTGRES_USER: ace #Can be changed but not after deployment
       POSTGRES_PASSWORD: replace_password #Change before deployment
     restart: always
   app:
@@ -23,12 +23,8 @@ services:
       DB_URL: jdbc:postgresql://app_db:5432/ace_exam_platform #Should end with the same as POSTGRES_DB
       DB_USERNAME: ace #Should be the same as the POSTGRES_USER
       DB_PASSWORD: replace_password #Should be the same as the POSTGRES_PASSWORD
-      DB_DDL: update #Should be either create, create-drop, update, validate. Defaults to create but should be set to validate after first run
+      DB_DDL: update #Should be either create, create-drop, update, validate. Set as update to update the database tables/schemas
       DB_DRIVER: org.postgresql.Driver #For the application to know the driver class
-      # Enviroment variables to specify Twilio SMS service https://console.twilio.com
-      TWILIO_NO: '+01234567890' # Can be retrieved from https://console.twilio.com
-      TWILIO_SID: Twilio SID # Can be retrieved from https://console.twilio.com
-      TWILIO_AUTH: '***********' # Can be retrieved from https://console.twilio.com
       # Enviroment variables to specify emailing
       EMAIL_ADDRESS: example@gmail.com # The company email that should be used to send emails
       EMAIL_PASSWORD: app password # The app password provided from this url: https://myaccount.google.com/apppasswords
