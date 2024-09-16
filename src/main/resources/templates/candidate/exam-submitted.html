@@ -34,13 +34,6 @@
 			<p class="text-center">You scored</p>
 			<h2 th:class="|text-center ${!exam.allowCutOffMark ? '' : scorePercent >= exam.cutOffMark ? 'green-text' : 'danger-text'}|" th:text="|${#numbers.formatDecimal(scorePercent * 100, 2, 1)}%|"></h2>
 		</th:block>
-		<!-- <th:bock th:if="${candidate.rating == -1}">
-			<form th:action="@{/exam/rate}" th:object="${rateCandidate}" method="post">
-				<input type="number" th:field="*{rating}">
-				<input type="text" th:field="*{comment}">
-				<button type="submit"></button>
-			</forml>
-		</th:block> -->
 		<p th:if="${errorMessage ne null}" class="text-center danger-text" th:text="|*${errorMessage}|"></p>
 		<a id="reset" th:href="@{/exam}" class="action-btn width-100 text-center br-16">Reset</a>
 	</div>
