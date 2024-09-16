@@ -52,6 +52,7 @@ public class CandidateController {
 	 */
 	@GetMapping( "/exam/select" )
 	public String examSelect( HttpServletResponse response, Model model ) {
+		examService.sortExams();
 		// Resetting all cookies
 		resetCookies( response );
 		model.addAttribute( "candidate", new RegisterCandidateDTO() );
@@ -69,7 +70,6 @@ public class CandidateController {
 	public String examLogin( RegisterCandidateDTO candidateDTO, HttpServletResponse response, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam != null && exam.getState() == ExamState.Ongoing ) {
-			// Adding examId as cookie
 			var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
 			examIdCookie.setPath( "/" );
 			examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
@@ -122,7 +122,7 @@ public class CandidateController {
 	 * @param model Used to pass arguments to the template
 	 * @return The preamble template
 	 */
-	@PostMapping( "/exam/validate" )
+	@PostMapping( "/exam/start" )
 	public String candidateValidate( RegisterCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
 		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
@@ -221,17 +221,6 @@ public class CandidateController {
 		return "candidate/exam-submitted";
 	}
 
-	// TODO implement
-	@PostMapping( "/exam/rate" )
-	public String rate( ExamCandidateRateDTO candidateDTO, HttpServletRequest request, Model model ) {
-		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
-		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
-		if ( exam == null ) {
-			return "redirect:/exam/select";
-		}
-		return "";
-	}
-
 	/**
 	 * Processes the exception and returns the appropriate template
 	 * <p>ie. A graceful failure of the program on the candidate's side
@@ -244,44 +233,44 @@ public class CandidateController {
 	 */
 	private <DTO extends BaseCandidateDTO> String handleCandidateException( CandidateException e, DTO candidateDTO, Exam exam, Model model, HttpServletResponse response ) {
 		model.addAttribute( "errorMessage", e.getMessage() );
-			switch ( e.getRedirect() ) {
-				case EXAM_SELECT -> {
-					resetCookies( response );
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
-				}
-				case PAPER_SELECT -> {
-					var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
-					examIdCookie.setPath( "/" );
-					examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
-					examIdCookie.setHttpOnly( true );
-					response.addCookie( examIdCookie );
-					insertCookies( response, candidateDTO );
-					model.addAttribute( "candidate", candidateDTO );
-					model.addAttribute( "exam", exam );
-				}
-				case LOGIN_PAGE -> {
-					if ( exam == null ) {
-						return "redirect:/exam";
-					}
-					var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
-					examIdCookie.setPath( "/" );
-					examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
-					examIdCookie.setHttpOnly( true );
-					response.addCookie( examIdCookie );
-					model.addAttribute( "field1", exam.getLoginField1() );
-					model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
-					model.addAttribute( "field2", exam.getLoginField2() );
-					model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
-					model.addAttribute( "candidate", candidateDTO );
-				}
-				case SUBMITTED -> {
-					resetCookies( response );
-					model.addAttribute( "candidate", candidateDTO );
-				}
-				case ERROR -> {
-				}
+		switch ( e.getRedirect() ) {
+			case EXAM_SELECT -> {
+				resetCookies( response );
+				model.addAttribute( "candidate", candidateDTO );
+				model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
 			}
+			case PAPER_SELECT -> {
+				var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
+				examIdCookie.setPath( "/" );
+				examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
+				examIdCookie.setHttpOnly( true );
+				response.addCookie( examIdCookie );
+				insertCookies( response, candidateDTO );
+				model.addAttribute( "candidate", candidateDTO );
+				model.addAttribute( "exam", exam );
+			}
+			case LOGIN_PAGE -> {
+				if ( exam == null ) {
+					return "redirect:/exam";
+				}
+				var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
+				examIdCookie.setPath( "/" );
+				examIdCookie.setMaxAge( Math.max( exam.getDuration(), 10 ) * 60 );
+				examIdCookie.setHttpOnly( true );
+				response.addCookie( examIdCookie );
+				model.addAttribute( "field1", exam.getLoginField1() );
+				model.addAttribute( "field1Desc", exam.getLoginField1Desc() );
+				model.addAttribute( "field2", exam.getLoginField2() );
+				model.addAttribute( "field2Desc", exam.getLoginField2Desc() );
+				model.addAttribute( "candidate", candidateDTO );
+			}
+			case SUBMITTED -> {
+				resetCookies( response );
+				model.addAttribute( "candidate", candidateDTO );
+			}
+			case ERROR -> {
+			}
+		}
 		return e.getRedirect().getPath();
 	}
 
@@ -358,7 +347,7 @@ public class CandidateController {
 	 */
 	private <DTO extends BaseCandidateDTO> Long retriveCookiesIntoCandidate( HttpServletRequest request, DTO candidateDTO ) {
 		Long examId = 0L;
-		if (request.getCookies().length == 0) {
+		if ( request.getCookies() == null || request.getCookies().length == 0 ) {
 			return examId;
 		}
 		for ( var cookie : request.getCookies() ) {
