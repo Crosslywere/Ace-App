@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.ace.app.entity.Candidate;
 
-import io.micrometer.common.lang.NonNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,12 +16,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class RegisterCandidateDTO extends BaseCandidateDTO {
+public class UnverifiedCandidateDTO extends BaseCandidateDTO {
 
 	private Long examId;
 	private List<String> paperNames = new ArrayList<>();
 
-	public RegisterCandidateDTO( @NonNull Candidate candidate ) {
+	public UnverifiedCandidateDTO( Candidate candidate ) {
 		super();
 		super.field1 = candidate.getField1();
 		super.field2 = candidate.getField2();
