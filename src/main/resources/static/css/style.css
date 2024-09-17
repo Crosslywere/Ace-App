@@ -158,6 +158,7 @@ td:last-child {
 th {
 	font-weight: 400;
 	padding: 22px 10px;
+	white-space: nowrap;
 	background-color: #56669F08;
 }
 th:first-child {
