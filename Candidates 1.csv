@@ -1,3 +1,3 @@
-Name,Password,Phone,Email
-Jude Ogboru,abcdefgh,,
-Adeyemi Odetunde,12345678,,
+AppID Name,AppID Password,Firstname,Lastname,State,Papers,Email
+Jude Ogboru,abcdefgh,Jude,Ogboru,DELTA,"Math,English,Physics",ogboruj@yahoo.com
+Adeyemi Odetunde,12345678,Adeyemi,Odetunde,LAGOS,Biology,
