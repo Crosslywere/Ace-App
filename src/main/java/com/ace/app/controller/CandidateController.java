@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.ace.app.dto.BaseCandidateDTO;
 import com.ace.app.dto.ExamCandidateDTO;
 import com.ace.app.dto.ExamCandidateRateDTO;
-import com.ace.app.dto.RegisterCandidateDTO;
+import com.ace.app.dto.UnverifiedCandidateDTO;
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
 import com.ace.app.model.CandidateException;
@@ -55,7 +55,7 @@ public class CandidateController {
 		examService.sortExams();
 		// Resetting all cookies
 		resetCookies( response );
-		model.addAttribute( "candidate", new RegisterCandidateDTO() );
+		model.addAttribute( "candidate", new UnverifiedCandidateDTO() );
 		model.addAttribute( "exams", examService.getExamsByState( ExamState.Ongoing ) );
 		return "candidate/exam-select";
 	}
@@ -67,7 +67,7 @@ public class CandidateController {
 	 * @return The template for entering the candidate's login details
 	 */
 	@PostMapping( "/exam/login" )
-	public String examLogin( RegisterCandidateDTO candidateDTO, HttpServletResponse response, Model model ) {
+	public String examLogin( UnverifiedCandidateDTO candidateDTO, HttpServletResponse response, Model model ) {
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam != null && exam.getState() == ExamState.Ongoing ) {
 			var examIdCookie = new Cookie( COOKIE_NAMES[0], Long.toString( exam.getExamId() ) );
@@ -94,7 +94,7 @@ public class CandidateController {
 	 * @return The template for selecting the candidate's papers
 	 */
 	@PostMapping( "/exam/papers" )
-	public String examPapers( RegisterCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
+	public String examPapers( UnverifiedCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
 		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, null ) );
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
@@ -106,7 +106,7 @@ public class CandidateController {
 		} catch ( CandidateException e ) {
 			return handleCandidateException( e, candidateDTO, exam, model, response );
 		}
-		candidateDTO = new RegisterCandidateDTO( candidate );
+		candidateDTO = new UnverifiedCandidateDTO( candidate );
 		if ( candidateDTO.getPaperNames().size() == exam.getPapersPerCandidate() ) {
 			return candidateValidate( candidateDTO, request, response, model );
 		}
@@ -123,7 +123,7 @@ public class CandidateController {
 	 * @return The preamble template
 	 */
 	@PostMapping( "/exam/start" )
-	public String candidateValidate( RegisterCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
+	public String candidateValidate( UnverifiedCandidateDTO candidateDTO, HttpServletRequest request, HttpServletResponse response, Model model ) {
 		candidateDTO.setExamId( retriveCookiesIntoCandidate( request, candidateDTO ) );
 		Exam exam = examService.getExamById( candidateDTO.getExamId() ).orElse( null );
 		if ( exam == null || exam.getState() != ExamState.Ongoing ) {
@@ -131,7 +131,7 @@ public class CandidateController {
 		}
 		Candidate candidate = null;
 		try {
-			candidate = candidateService.loginCandidate( candidateDTO );
+			candidate = candidateService.login( candidateDTO );
 		} catch ( CandidateException e ) {
 			return handleCandidateException( e, candidateDTO, exam, model, response );
 		}

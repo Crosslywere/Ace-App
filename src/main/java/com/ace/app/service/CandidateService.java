@@ -3,7 +3,7 @@ package com.ace.app.service;
 import com.ace.app.entity.Candidate;
 import com.ace.app.model.CandidateException;
 import com.ace.app.dto.ExamCandidateDTO;
-import com.ace.app.dto.RegisterCandidateDTO;
+import com.ace.app.dto.UnverifiedCandidateDTO;
 
 /**
  * @author Ogboru Jude
@@ -11,13 +11,7 @@ import com.ace.app.dto.RegisterCandidateDTO;
  */
 public interface CandidateService {
 
-	/**
-	 * 
-	 * @param candidateDTO
-	 * @return
-	 * @throws CustomException
-	 */
-	Candidate putCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException;
+	Candidate login( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
 
 	/**
 	 * 
@@ -25,7 +19,15 @@ public interface CandidateService {
 	 * @return
 	 * @throws CustomException
 	 */
-	Candidate loginCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException;
+	Candidate putCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
+
+	/**
+	 * 
+	 * @param candidateDTO
+	 * @return
+	 * @throws CustomException
+	 */
+	Candidate loginCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
 
 	/**
 	 * 
