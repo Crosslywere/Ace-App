@@ -1,5 +1,8 @@
 package com.ace.app.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +15,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreateCandidateDTO extends BaseCandidateDTO {
-	private String email;
-	private String phoneNumber;
-	private Boolean notified;
+	protected String email;
+	protected String phoneNumber;
+	protected Boolean notified;
+	protected String firstname;
+	protected String othername;
+	protected String lastname;
+	protected String state;
+	protected List<String> papernames = new ArrayList<>();
 }

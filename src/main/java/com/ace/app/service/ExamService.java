@@ -39,12 +39,12 @@ public interface ExamService {
 	 */
 	Optional<Exam> getExamById( Long examId );
 
-	/**
-	 * 
-	 * @param title
-	 * @return
-	 */
-	List<Exam> getExamsByTitleLike( String title );
+	// /**
+	//  * 
+	//  * @param title
+	//  * @return
+	//  */
+	// List<Exam> getExamsByTitleLike( String title );
 
 	/**
 	 * Gets the number of exams with their current state as the argument
@@ -58,7 +58,7 @@ public interface ExamService {
 	 * @param examDTO Data transfer object to create the exam from
 	 * @return {@code true} if the exam was successfully created, otherwise {@code false}
 	 */
-	boolean createExam( CreateExamDTO examDTO );
+	void createExam( CreateExamDTO examDTO );
 
 	/**
 	 * Deletes an exam via its exam id.

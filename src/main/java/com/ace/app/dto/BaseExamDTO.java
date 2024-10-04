@@ -30,6 +30,7 @@ public abstract class BaseExamDTO {
 	protected String loginField1Desc;
 	protected CandidateField loginField2;
 	protected String loginField2Desc;
+	// TODO Remove papersPerCandidate variable (Candidates upload & paper upload will determine paper count)
 	protected Integer papersPerCandidate;
 
 }

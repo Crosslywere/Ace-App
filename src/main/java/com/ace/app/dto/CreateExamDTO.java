@@ -32,6 +32,11 @@ public class CreateExamDTO extends BaseExamDTO {
 	private List<CreateCandidateDTO> candidates;
 	private final Date MIN_DATE = new Date( System.currentTimeMillis() );
 
+	private boolean hasName = false;
+	private boolean hasEmail = false;
+	private boolean hasPhoneNumber = false;
+	private boolean sendEmail = false;
+
 
 	public CreateExamDTO() {
 		super();
@@ -224,7 +229,155 @@ public class CreateExamDTO extends BaseExamDTO {
 	 * @param self The instance of the class to be used to set the login fields.
 	 * @return A list of candidate credentials.
 	 */
-	 protected static List<CreateCandidateDTO> parseCandidates( String text, CreateExamDTO self ) {
+	protected static List<CreateCandidateDTO> parseCandidates( String text, CreateExamDTO self ) {
+		Scanner scanner = new Scanner( text );
+		List<CreateCandidateDTO> candidates = new ArrayList<>();
+		boolean headRead = false;
+		int email = -1, phone = -1, firstname = -1, othername = -1, lastname = -1, state = -1, appId1 = -1, appId2 = -1, papers = -1;
+		while ( scanner.hasNextLine() ) {
+			String line = scanner.nextLine();
+			if ( line.matches( "^Evaluation Warning: The document was created with Spire\\.Doc for JAVA\\.$" ) ) {
+				continue;
+			}
+			if ( !headRead ) {
+				headRead = true;
+				boolean appId1Set = false, appId2Set = false;
+				List<String> columnHeads = parseCSVLine( line );
+				// Figuring out the columns via the headers
+				for ( int i = 0; i < columnHeads.size(); i++ ) {
+					String header = columnHeads.get( i ).trim();
+					if ( header.matches( "^[Aa][Pp][Pp][Ii][Dd][\\s\\S]*" ) ) {
+						if ( appId1 == -1 ) {
+							appId1 = i;
+							header = header.replaceAll( "^[Aa][Pp]{2}[Ii][Dd]", "" ).trim();
+							self.setLoginField1Desc( header );
+							if ( header.matches( "[Nn][Uu][Mm]" ) ) {
+								self.setLoginField1( CandidateField.Number );
+								appId1Set = true;
+							}
+						} else if ( appId2 == -1 ) {
+							appId2 = i;
+							header = header.replaceAll( "^[Aa][Pp]{2}[Ii][Dd]", "" ).trim();
+							self.setLoginField2Desc( header );
+							if ( header.matches( "[Nn][Uu][Mm]" ) ) {
+								self.setLoginField2( CandidateField.Number );
+								appId2Set = true;
+							} else if ( header.matches( "[Pp][Aa][Ss]{2}[Ww][Oo][Rr][Dd]" ) ) {
+								self.setLoginField2( CandidateField.Password );
+								appId2Set = true;
+							}
+						}
+					}
+					if ( header.matches( "([Ee]-?)?[Mm][Aa][Ii][Ll]$" ) ) {
+						email = i;
+						self.setHasEmail( true );
+						if ( appId1 == email ) {
+							self.setLoginField1( CandidateField.Email );
+							appId1Set = true;
+						} else if ( appId2 == email ) {
+							self.setLoginField2( CandidateField.Email );
+							appId2Set = true;
+						}
+					}
+					else if ( header.matches( "([Tt][Ee][Ll][Ee][Pp][Hh][Oo][Nn][Ee]$)|([Tt][Ee][Ll]$)|([Pp][Hh][Oo][Nn][Ee]( [Nn][Uu][Mm])?)" ) ) {
+						phone = i;
+						self.setHasPhoneNumber( true );
+						if ( appId1 == phone ) {
+							self.setLoginField1( CandidateField.Telephone );
+							appId1Set = true;
+						} else if ( appId2 == phone ) {
+							self.setLoginField2( CandidateField.Telephone );
+							appId2Set = true;
+						}
+					}
+					else if ( header.matches( "[Ff][Ii][Rr][Ss][Tt] ?[Nn][Aa][Mm][Ee]$" ) ) {
+						firstname = i;
+						self.setHasName( true );
+					}
+					else if ( header.matches( "[Ll][Aa][Ss][Tt] ?[Nn][Aa][Mm][Ee]$" ) ) {
+						lastname = i;
+						self.setHasName( true );
+					}
+					else if ( header.matches( "[Oo][Tt][Hh][Ee][Rr] ?[Nn][Aa][Mm][Ee][Ss]?$" ) ) {
+						self.setHasName( true );
+						othername = i;
+					}
+					else if ( header.matches( "[Ss][Tt][Aa][Tt][Ee]" ) ) {
+						state = i;
+					}
+					else if ( header.matches( "[Pp][Aa][Pp][Ee][Rr][Ss]?$" ) ) {
+						papers = i;
+					}
+				}
+				if ( appId1 == -1 ) {
+					scanner.close();
+					throw new RuntimeException( "No 'APPID' column found!" );
+				} else {
+					if ( !appId1Set ) {
+						self.setLoginField1( CandidateField.Text );
+					}
+					if ( !appId2Set && appId2 > -1 ) {
+						self.setLoginField2( CandidateField.Text );
+					} else if ( appId2 == -1 ) {
+						self.setLoginField2( CandidateField.None );
+					}
+				}
+				// if ( papers == -1 ) {
+				// 	// scanner.close();
+				// 	// throw new RuntimeException( "No 'PAPER' column found!" );
+				// }
+			} else {
+				List<String> columns = parseCSVLine( line );
+				CreateCandidateDTO candidate = new CreateCandidateDTO();
+				if ( columns.size() > appId1 && !columns.get( appId1 ).isBlank() ) {
+					candidate.setField1( columns.get( appId1 ) );
+				} else {
+					// Skip candidate if the candidate doesn't have the first AppID
+					continue;
+				}
+				if ( appId2 > -1 && columns.size() > appId2 && !columns.get( appId2 ).isBlank() ) {
+					candidate.setField2( columns.get( appId2 ) );
+				} else if ( appId2 > -1 ) {
+					// Skip candidate if there is meant to be an AppID data attribute for the second field
+					continue;
+				}
+				if ( email > -1 && columns.size() > email ) {
+					candidate.setEmail( columns.get( email ) );
+				}
+				if ( phone > -1 && columns.size() > phone ) {
+					candidate.setPhoneNumber( columns.get( phone ) );
+				}
+				if ( firstname > -1 && columns.size() > firstname ) {
+					candidate.setFirstname( columns.get( firstname ) );
+				}
+				if ( othername > -1 && columns.size() > othername ) {
+					candidate.setOthername( columns.get( othername ) );
+				}
+				if ( lastname > -1 && columns.size() > lastname ) {
+					candidate.setLastname( columns.get( lastname ) );
+				}
+				if ( state > -1 && columns.size() > state ) {
+					candidate.setState( columns.get( state ) );
+				}
+				if ( papers > -1 && columns.size() > papers ) {
+					// TODO pars papers as a csv
+					List<String> paperNames = parseCSVLine( columns.get( papers ) );
+					candidate.getPapernames().addAll( paperNames );
+				}
+				candidates.add( candidate );
+			}
+		}
+		scanner.close();
+		return candidates;
+	}
+
+	/**
+	 * Processes the string containing the candidates either as a single column or a double column
+	 * @param text The text gotten from the file stream.
+	 * @param self The instance of the class to be used to set the login fields.
+	 * @return A list of candidate credentials.
+	 */
+	protected static List<CreateCandidateDTO> parseCandidate( String text, CreateExamDTO self ) {
 		Scanner scanner = new Scanner( text );
 		List<CreateCandidateDTO> candidates = new ArrayList<>();
 		boolean firstLine = true;
@@ -365,16 +518,17 @@ public class CreateExamDTO extends BaseExamDTO {
 		StringBuilder builder = new StringBuilder();
 		boolean quoted = false;
 		for ( int i = 0; i < line.length(); i++ ) {
-			if ( line.charAt( i ) == ',' && !quoted ) {
+			char ch = line.charAt( i );
+			if ( ch == ',' && !quoted ) {
 				columns.add( builder.toString().trim() );
 				builder = new StringBuilder();
 				continue;
 			}
-			if ( line.charAt( i ) == '"' ) {
+			if ( ch == '"' ) {
 				quoted = !quoted;
 				continue;
 			}
-			builder.append( line.charAt( i ) );
+			builder.append( ch == 147 || ch == 148 ? '"' : ch );
 		}
 		columns.add( builder.toString() );
 		return columns;

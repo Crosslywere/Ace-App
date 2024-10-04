@@ -5,7 +5,6 @@ import java.io.Serializable;
 import com.ace.app.entity.Exam;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -26,7 +25,6 @@ import lombok.Setter;
 public class CandidateId implements Serializable {
 
 	@ManyToOne
-	@JoinColumn( name = "exam_id" )
 	Exam exam;
 
 	String field1;

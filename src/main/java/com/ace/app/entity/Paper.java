@@ -11,7 +11,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -42,8 +41,8 @@ public class Paper {
 
 	private Boolean manditory;
 
-	@ManyToMany( mappedBy = "papers", cascade = { CascadeType.DETACH } )
-	private List<Candidate> candidates;
+	// @ManyToMany( mappedBy = "papers", cascade = { CascadeType.DETACH } )
+	// private List<Candidate> candidates;
 
 	public Paper( CreatePaperDTO paperDTO, Exam exam ) {
 		paperId = new PaperId( exam, paperDTO.getName() );

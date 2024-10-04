@@ -18,7 +18,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ModifyOExamDTO extends BaseExamDTO {
 
-	private Boolean registrationLocked;
+	// private Boolean registrationLocked;
 	private List<ModifyOCandidateDTO> candidates  = new ArrayList<>();
 
 	public ModifyOExamDTO( Exam exam ) {
@@ -33,7 +33,7 @@ public class ModifyOExamDTO extends BaseExamDTO {
 		super.loginField1Desc = exam.getLoginField1Desc();
 		super.loginField2 = exam.getLoginField2();
 		super.loginField2Desc = exam.getLoginField2Desc();
-		this.registrationLocked = exam.getRegistrationLocked();
+		// this.registrationLocked = exam.getRegistrationLocked();
 		this.candidates = new ArrayList<>();
 		exam.getCandidates().forEach( candidate -> {
 			candidates.add( new ModifyOCandidateDTO( candidate ) );

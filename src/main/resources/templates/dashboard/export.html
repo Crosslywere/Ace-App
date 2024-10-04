@@ -44,7 +44,7 @@
 			</div>
 			<div class="container white-bg br-16 border flex-col fit-height" style="padding:0 53px 53px 53px;margin-top:40px">
 				<h2>Configuration Exam Export</h2>
-				<form th:action="@{/download}" th:object="${config}" method="post">
+				<!-- <form th:action="@{/download}" th:object="${config}" method="post">
 					<input type="number" th:field="*{examId}" hidden>
 					<div class="flex-row align-center">
 						<input type="checkbox" th:field="*{serialNumber}" class="mr-8">
@@ -110,14 +110,37 @@
 					<div class="flex-row justify-end">
 						<button type="submit" class="action-btn br-16">Configure</button>
 					</div>
+				</form> -->
+				<!-- <form th:action="@{/export/download}" id="export" th:object="${configurer}" method="get">
+					<input type="number" th:field="*{examId}" hidden>
+					<label>
+						<input type="checkbox" th:field="*{exportAllCandidates}">
+						EXPORT ALL CANDIDATES
+					</label>
+					<input type="submit" value="Download" >
+				</form> -->
+				<form th:action="@{/download/{id}(id=${exam.examId})}" th:object="${configurer}" method="post">
+					<button type="submit">Proceed</button>
 				</form>
 			</div>
 		</div>
 	</div>
 	<script>
 		window.addEventListener("DOMContentLoaded", () => {
-			snStr = document.getElementById("serialNumberStr")
-			console.log(snStr.value)
+			// snStr = document.getElementById("serialNumberStr")
+			// console.log(snStr.value)
+
+			const form = document.querySelector("form#export")
+			const submitForm = document.querySelector("form#export input[type='submit']")
+			submitForm.addEventListener("click", () => {
+				var elem = document.createElement('a');
+				elem.href = form.action;
+				elem.download = "export.csv"
+				document.documentElement.appendChild(elem)
+				elem.click()
+				document.documentElement.remove(elem);
+			})
+			window.onload
 		})
 	</script>
 </body>

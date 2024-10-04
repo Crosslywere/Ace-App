@@ -1,9 +1,15 @@
 package com.ace.app.service;
 
+import org.springframework.scheduling.annotation.Async;
+
 import com.ace.app.dto.CreateCandidateDTO;
 import com.ace.app.dto.CreateExamDTO;
 import com.ace.app.entity.Candidate;
 
+/**
+ * @author Ogboru Jude
+ * @version 0.0.1-SNAPSHOT
+ */
 public interface NotificationSenderService {
 
 	/**
@@ -12,6 +18,7 @@ public interface NotificationSenderService {
 	 * @param subject The subject of the email.
 	 * @param body The body of the email.
 	 */
+	@Async
 	void sendMail( String to, String subject, String body );
 	
 	/**
@@ -21,7 +28,8 @@ public interface NotificationSenderService {
 	 * if the email isn't valid in such instances the function may return {@code true} but 
 	 * send the failure to the sending email.
 	 */
-	boolean sendMail( Candidate candidate );
+	@Async
+	void sendMail( Candidate candidate );
 
 	/**
 	 * Sends an email to the candidate if the candidate has an email
@@ -33,6 +41,7 @@ public interface NotificationSenderService {
 	 * if the email isn't valid in such instances the function may return {@code true} but 
 	 * send the failure to the sending email.
 	 */
-	<C extends CreateCandidateDTO, E extends CreateExamDTO> boolean sendMail( C candidateDTO, E examDTO );
+	@Async
+	<C extends CreateCandidateDTO, E extends CreateExamDTO> void sendMail( C candidateDTO, E examDTO );
 
 }

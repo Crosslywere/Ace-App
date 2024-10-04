@@ -12,7 +12,7 @@ public enum CandidateExceptionRedirect {
 	LOGIN_PAGE( "candidate/exam-login" ),
 	PAPER_SELECT( "candidate/exam-papers" ),
 	SUBMITTED( "candidate/exam-submitted" ),
-	ERROR( "error" );
+	ERROR( "candidate/error" );
 
 	private final String path;
 

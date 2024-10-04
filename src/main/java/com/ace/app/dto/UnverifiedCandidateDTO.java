@@ -26,9 +26,11 @@ public class UnverifiedCandidateDTO extends BaseCandidateDTO {
 		super.field1 = candidate.getField1();
 		super.field2 = candidate.getField2();
 		this.examId = candidate.getExam().getExamId();
-		this.paperNames = new ArrayList<>();
-		candidate.getPapers().forEach( paper -> {
-			paperNames.add( paper.getName() );
-		} );
+		// TODO
+		// this.paperNames = new ArrayList<>();
+		// candidate.getPapers().forEach( paper -> {
+		// 	paperNames.add( paper.getName() );
+		// } );
+		this.paperNames = candidate.getPapernames();
 	}
 }

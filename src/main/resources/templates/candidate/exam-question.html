@@ -9,7 +9,7 @@
 		.container {
 			width: 100%;
 			max-width: 1160px;
-			margin:130px auto 0;
+			margin:96px auto 16px;
 		}
 		h2 {
 			display: inline-block;
@@ -56,30 +56,24 @@
 	<div class="border-bottom flex-row justify-between align-center" style="padding:36px 72px 24px;">
 		<a th:href="@{/exam}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a><section><span id="timer"></span>/<span id="duration" th:text="${exam.duration}"></span></section>
 	</div>
-	<div id="papers" class="hidden">
+	<div id="papers" class="-hidden flex-row justify-center">
 		<!-- Here for up/down arrow navigation of questions -->
 		<th:block th:each="paper : ${candidate.paperNames}" th:with="currentPaper=${candidate.currentPaperName}">
 			<button type="submit"
 			th:formaction="@{/exam/{paperName}/1(paperName=${paper})}"
 			th:aria-current="${currentPaper == paper ? 'true' : ''}"
 			th:text="${paper}"
-			class="exam-paper"
+			th:class="|exam-paper ${currentPaper == paper ? 'action-btn' : 'alt-action-btn'} br-16|"
+			style="width:154px;height:46px;margin:0 4px;"
 			form="question-form">Paper</button>
 		</th:block>
-		<button form="question-form" class="exam-paper" type="submit" th:formaction="@{/exam/submit}">Submit</button>
-		<!-- <input form="question-form" type="number" th:field="${candidate.examId}" hidden>
-		<input form="question-form" type="text" th:field="${candidate.field1}" hidden>
-		<input form="question-form" type="text" th:field="${candidate.field2}" hidden> -->
+		<button form="question-form" class="exam-paper danger-btn br-16" type="submit" th:formaction="@{/exam/submit}">Submit</button>
 		<input form="question-form" type="number" th:field="${candidate.currentPaperQuestionNumber}" hidden>
 		<input form="question-form" type="number" th:field="${candidate.timeUsed}" hidden>
 		<input form="question-form" type="text" th:field="${candidate.currentPaperName}" hidden>
 	</div>
 	<form th:object="${candidate}" id="question-form" method="post" class="container">
-		<div class="width-100 flex-row align-center">
-			<button th:if="*{prevQuestionPath != null}" type="submit" id="prev-question" class="blue-text none-btn" style="float:left" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
-			<h2 th:text="|*{currentPaperName}|" style="display:inline-block;margin:0 auto;"></h2>
-			<button th:formaction="@{/exam/{next}(next=*{nextQuestionPath})}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="*{nextQuestionPath == 'submit' ? 'Submit' : 'Next'}">Next</button>
-		</div>
+		<h2 th:text="|*{currentPaperName}|" style="display:inline-block;margin:0 auto;text-align:center;" class="width-100"></h2>
 		<p th:text="|*{currentPaperQuestionNumber}. *{currentQuestionStr}|"></p>
 		<th:block th:each="option, optionIndex : *{currentOptions}">
 			<div style="margin-bottom:16px;padding:0 66px">
@@ -89,6 +83,10 @@
 				</label>
 			</div>
 		</th:block>
+		<div class="width-100"></div>
+			<button th:if="*{prevQuestionPath != null}" type="submit" id="prev-question" class="blue-text none-btn" style="height:46px;float:left" th:formaction="@{/exam/{prev}(prev=*{prevQuestionPath})}"><span class="flex align-center"><img th:src="@{/images/arrow-left-round-blue.svg}" alt="prev" class="mr-8">Previous</span></button>
+			<button th:formaction="@{/exam/{next}(next=*{nextQuestionPath})}" type="submit" id="next-question" class="alt-action-btn br-16" style="width:154px;height:46px;float:right;" th:text="*{nextQuestionPath == 'submit' ? 'Submit' : 'Next'}">Next</button>
+		</div>
 		<div id="question-select" class="flex-row">
 			<button type="submit"
 			th:each="map : *{currentPaperQuestionsAnswered}"
@@ -165,18 +163,28 @@
 			document.onkeydown = (ev) => {
 				switch (ev.key) {
 					case '1':
+					case 'A':
+					case 'a':
 						selectOption(0);
 						break;
 					case '2':
+					case 'B':
+					case 'b':
 						selectOption(1);
 						break;
 					case '3':
+					case 'C':
+					case 'c':
 						selectOption(2);
 						break;
 					case '4':
+					case 'D':
+					case 'd':
 						selectOption(3);
 						break;
 					case '5':
+					case 'E':
+					case 'e':
 						selectOption(4);
 						break;
 				}
@@ -193,10 +201,12 @@
 							nextQuestion.click();
 						}
 						break;
-					case 'ArrowUp':
+					case 'N':
+					case 'n':
 						selectPaper(-1);
 						break;
-					case 'ArrowDown':
+					case 'P':
+					case 'p':
 						selectPaper(1);
 						break;
 				}

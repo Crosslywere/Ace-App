@@ -19,17 +19,20 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ace.app.dto.CreateExamDTO;
 import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
-import com.ace.app.dto.QueryDTO;
+import com.ace.app.entity.Candidate;
 import com.ace.app.entity.Exam;
-import com.ace.app.entity.ExportConfig;
+import com.ace.app.entity.ExportConfigurer;
 import com.ace.app.model.ExamState;
-import com.ace.app.repository.ExamConfigRepository;
+import com.ace.app.repository.ExportConfigurerRepository;
+import com.ace.app.service.CandidateService;
 import com.ace.app.service.ExamService;
+import com.ace.app.service.SearchService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 /**
- * Controller for the dashboard on the server machine
  * @author Ogboru Jude
  * @version 0.0.1-SNAPSHOT
  */
@@ -40,7 +43,13 @@ public class DashboardController {
 	private ExamService examService;
 
 	@Autowired
-	private ExamConfigRepository configRepo;
+	private CandidateService candidateService;
+
+	@Autowired
+	private SearchService searchService;
+
+	@Autowired
+	private ExportConfigurerRepository configurerRepository;
 
 	/**
 	 * Checks if the request is from either {@code localhost} or {@code 127.0.0.1}
@@ -94,6 +103,7 @@ public class DashboardController {
 	@GetMapping( "/recorded" )
 	public String recorded( Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
+			examService.sortExams();
 			List<Exam> exams = examService.getExamsByState( ExamState.Recorded );
 			model.addAttribute( "exams", exams );
 			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
@@ -137,7 +147,7 @@ public class DashboardController {
 			if ( search == null || search.isBlank() ) {
 				return "redirect:/advanced-search";
 			}
-			List<Exam> exams = examService.getExamsByTitleLike( search );
+			List<Exam> exams = searchService.findExamsByTitle( search );
 			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			model.addAttribute( "results", exams );
 			return "dashboard/search";
@@ -147,37 +157,73 @@ public class DashboardController {
 
 	/**
 	 * TODO
-	 * Get mapping for the advanced search template
-	 * @param model Provided by Springboot to pass arguments to the template
-	 * @param request Used to determine if request comes from the server
-	 * @return The template for advanced searches
+	 * @param examId
+	 * @param model
+	 * @param request
+	 * @return
 	 */
-	@GetMapping( "/advanced-search" )
-	public String search( Model model, HttpServletRequest request ) {
-		// TODO implement
+	@GetMapping( "/manage/{examId}" )
+	public String manage( @PathVariable( "examId" ) Long examId, Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
-			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
-			model.addAttribute( "searchQuery", new QueryDTO() );
-			return "dashboard/advanced-search/search";
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Ongoing ) {
+				return "redirect:/ongoing";
+			}
+			model.addAttribute( "countOngoing", 1 );
+			model.addAttribute( "exam", exam );
+			return "dashboard/manage";
 		}
 		return "redirect:/exam";
 	}
 
 	/**
 	 * TODO
-	 * @param searchQuery The search configuration object
-	 * @param model  Provided by Springboot to pass arguments to the template
-	 * @param request Used to determine if request comes from the server
-	 * @return A template containing results from the search
+	 * @param examId
+	 * @param search
+	 * @param model
+	 * @param request
+	 * @return
 	 */
-	@PostMapping( "/advanced-search" )
-	public String search( QueryDTO query, Model model, HttpServletRequest request ) {
-		// TODO implement
+	@GetMapping( "/manage/{examId}/" )
+	public String search( @PathVariable( "examId" ) Long examId, @RequestParam String search, Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
-			return "dashboard/advanced-search/search-result";
+			if ( search == null || search.isBlank() ) {
+				return "redirect:/manage/" + examId + "/all";
+			}
+			Exam exam = examService.getExamById( examId ).orElse( null );
+			if ( exam == null || exam.getState() != ExamState.Ongoing ) {
+				return "redirect:/ongoing";
+			}
+			var candidates = searchService.findCandidatesByString( examId, search );
+			model.addAttribute( "exam", exam );
+			model.addAttribute( "countOngoing", 1 );
+			model.addAttribute( "candidates", candidates );
+			return "dashboard/manage-search";
 		}
 		return "redirect:/exam";
 	}
+
+	/**
+	 * 
+	 * @param examId
+	 * @param field1
+	 * @param field2
+	 * @param request
+	 * @return
+	 */
+	@GetMapping( "/allow" )
+	public String getMethodName( @RequestParam Long examId, @RequestParam String field1, @RequestParam String field2, HttpServletRequest request ) {
+		if ( isLocalhost( request ) ) {
+			Candidate candidate = searchService.findCandidate( examId, field1, field2 );
+			if ( candidate != null ) {
+				candidate.setHasLoggedIn( false );
+				candidateService.update( candidate );
+			}
+			return "redirect:/manage/" + examId + "/all";
+		}
+		return "redirect:/exam";
+	}
+	
 
 	/**
 	 * The get mapping for the {@code /create} route.
@@ -383,10 +429,12 @@ public class DashboardController {
 			if ( exam == null || exam.getState() != ExamState.Recorded ) {
 				return "redirect:/recorded";
 			}
-			ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig( exam ) );
-			config.setExamId( exam.getExamId() );
-			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
-			model.addAttribute( "config", config );
+			// ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig( exam ) );
+			// config.setExamId( exam.getExamId() );
+			// model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
+			// model.addAttribute( "config", config );
+			var configurer = configurerRepository.findById( 1 ).orElse( configurerRepository.save( new ExportConfigurer() ) );
+			model.addAttribute( "configurer", configurer );
 			model.addAttribute( "exam", exam );
 			return "dashboard/export";
 		}
@@ -395,19 +443,20 @@ public class DashboardController {
 
 	/**
 	 * Post mapping to get the link for downloading the exams details as a .csv file using the configured template
-	 * @param config  The configuration to be used for the export.
+	 * @param examId The ID of the exam to be exported
+	 * @param configurer The configuration to be used for the export.
 	 * @param model Provided by Springboot to pass arguments to the template
 	 * @param request Used to determine if the request comes from the server
 	 * @return A template containing the link to download the exported exam
 	 */
-	@PostMapping( "/download" )
-	public String export( ExportConfig config, Model model, HttpServletRequest request ) {
+	@PostMapping( "/download/{examId}" )
+	public String export( @PathVariable( "examId" ) Long examId, ExportConfigurer configurer, Model model, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
-			Exam exam = examService.getExamById( config.getExamId() ).orElse( null );
+			Exam exam = examService.getExamById( examId ).orElse( null );
 			if ( exam == null || exam.getState() != ExamState.Recorded ) {
 				return "redirect:/recorded";
 			}
-			configRepo.save( config );
+			configurerRepository.save( configurer );
 			model.addAttribute( "countOngoing", examService.countExamsByState( ExamState.Ongoing ) );
 			model.addAttribute( "exam", exam );
 			return "dashboard/download";
@@ -429,49 +478,25 @@ public class DashboardController {
 			if ( exam == null || exam.getState() != ExamState.Recorded ) {
 				return null;
 			}
+			ExportConfigurer configurer = configurerRepository.findById( 1 ).orElse( null );
+			if ( configurer == null ) {
+				return null;
+			}
+			File file = new File( "recent_export.csv" );
+			String content = configurer.generateCSV( exam );
 			try {
-				ExportConfig config = configRepo.findById( ( byte )1 ).orElse( new ExportConfig() );
-				String result = config.export( exam );
-				File file = new File( config.getFilename() );
-				file.deleteOnExit();
 				if ( file.createNewFile() ) {
-					FileWriter writer = new FileWriter( file, false );
-					writer.write( result );
-					writer.close();
-				} else { // Failed to create a new file therefore file already exists
-					FileWriter writer = new FileWriter( file, false );
-					writer.write( result );
-					writer.close();
+					file.deleteOnExit();
 				}
+				FileWriter fw = new FileWriter( file, false );
+				fw.write( content );
+				fw.close();
 				return new FileSystemResource( file );
 			} catch ( IOException e ) {
 				e.printStackTrace();
-				return null;
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * TODO
-	 * @param examId
-	 * @param model
-	 * @param request
-	 * @return
-	 */
-	@GetMapping( "/copy/{examId}" )
-	public String copy( @PathVariable( "examId") Long examId, Model model, HttpServletRequest request ) {
-		// TODO implement
-		if ( isLocalhost( request ) ) {
-			Exam exam = examService.getExamById( examId ).orElse( null );
-			if ( exam == null || exam.getState() != ExamState.Recorded ) {
-				return "redirect:/exam";
-			}
-			// CopyExamDTO examDTO = new CopyExamDTO( exam );
-			// model.addAttribute( "exam", examDTO );
-			return "dashboard/modify-scheculed";
-		}
-		return "redirect:/exam";
 	}
 
 	/**
@@ -513,4 +538,5 @@ public class DashboardController {
 		}
 		return "redirect:/exam";
 	}
+
 }

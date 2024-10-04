@@ -10,6 +10,10 @@ import com.ace.app.entity.CandidateQuestionAnswerMapper;
 import com.ace.app.entity.Paper;
 import com.ace.app.model.CandidateQuestionAnswerMapperId;
 
+/**
+ * @author Ogboru Jude
+ * @version 0.0.1-SNAPSHOT
+ */
 @Repository
 public interface CandidateQuestionAnswerMapperRepository extends JpaRepository<CandidateQuestionAnswerMapper, CandidateQuestionAnswerMapperId> {
 

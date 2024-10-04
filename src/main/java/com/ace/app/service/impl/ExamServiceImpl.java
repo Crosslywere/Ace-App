@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.ace.app.dto.CreateCandidateDTO;
@@ -57,8 +58,17 @@ public class ExamServiceImpl implements ExamService {
 		}
 		if ( ( exam.getScheduledDate().compareTo( today ) == 0 && ( exam.getStartTime().compareTo( now ) <= 0
 				&& exam.getEndTime().compareTo( now ) > 0 ) ) && exam.getState() != ExamState.Ongoing ) {
-			exam.setState( ExamState.Ongoing );
-			examsToUpdate.add( exam );
+			if ( !exam.getCandidates().isEmpty() ) {
+				exam.getCandidates().forEach( candidate -> {
+					exam.getPapers().forEach( paper -> {
+						if ( paper.getManditory() && !candidate.getPapernames().contains( paper.getName() ) ) {
+							candidate.getPapernames().add( paper.getName() );
+						}
+					} );
+				} );
+				exam.setState( ExamState.Ongoing );
+				examsToUpdate.add( exam );
+			}
 		} else if ( exam.getScheduledDate().compareTo( today ) < 0 || ( exam.getScheduledDate().compareTo( today ) == 0
 				&& exam.getEndTime().compareTo( now ) <= 0 ) ) {
 			exam.setState( ExamState.Recorded );
@@ -109,39 +119,33 @@ public class ExamServiceImpl implements ExamService {
 		return examRepository.findById( examId );
 	}
 
-	public List<Exam> getExamsByTitleLike( String title ) {
-		return examRepository.findByTitleContainingIgnoreCase( title );
-	}
-
 	@Override
 	public long countExamsByState( ExamState state ) {
 		return examRepository.countByState( state );
 	}
 
+	@Async
 	@Override
-	public boolean createExam( CreateExamDTO examDTO ) {
+	public void createExam( CreateExamDTO examDTO ) {
 		if ( examDTO.getExamId() != null ) {
 			// The update exam method should be called instead of the create exam method
 			// Because this will update an already existing exam on the database
 			// Or could otherwise be overwritten causing an error
-			System.out.println( "Use update exam. Attempted to create exam with exam Id = " + examDTO.getExamId() );
-			return false;
+			log.warn( "Use update exam. Attempted to create exam with exam Id = {}", examDTO.getExamId() );
+			// System.out.println( "Use update exam. Attempted to create exam with exam Id = " + examDTO.getExamId() );
+			return;
 		}
+		examRepository.save( new Exam( examDTO ) );
 		for ( CreateCandidateDTO candidate : examDTO.getCandidates() ) {
 			// Remove the extra login field that is not desired
 			if ( examDTO.getLoginField2() == CandidateField.None ) {
 				candidate.setField2( "" );
 			}
 			// Sending notifying email
-			if ( candidate.getEmail() != null && !candidate.getEmail().isBlank() ) {
-				boolean notified = senderService.sendMail( candidate, examDTO );
-				if ( !notified ) {
-					candidate.setNotified( senderService.sendSMS( candidate, examDTO ) );
-				}
+			if ( candidate.getEmail() != null && !candidate.getEmail().isBlank() && examDTO.isSendEmail() ) {
+				senderService.sendMail( candidate, examDTO );
 			}
 		}
-		examRepository.save( new Exam( examDTO ) );
-		return true;
 	}
 
 	@Override
@@ -271,10 +275,7 @@ public class ExamServiceImpl implements ExamService {
 							if ( !candidate.getEmail().equals( oldExam.getCandidates().get( i ).getEmail() ) || 
 								 !candidate.getPhoneNumber().equals( oldExam.getCandidates().get( i ).getPhoneNumber() ) ||
 								 !timeChanged.getValue() )  {
-								boolean notified = senderService.sendMail( candidate );
-								if ( !notified ) {
-									candidate.setNotified( senderService.sendSMS( candidate ) );
-								}
+								senderService.sendMail( candidate );
 								notificationHandled = true;
 							}
 							oldExam.getCandidates().set( i, candidate );
@@ -289,7 +290,6 @@ public class ExamServiceImpl implements ExamService {
 						senderService.sendMail( candidate );
 					}
 				} );
-				oldExam.setRegistrationLocked( !oldExam.getCandidates().isEmpty() );
 				shouldSave = true;
 			}
 			if ( shouldSave ) {
@@ -332,9 +332,6 @@ public class ExamServiceImpl implements ExamService {
 			}
 			if ( !replacement.getLoginField2Desc().equals( oldExam.getLoginField2Desc() ) ) {
 				oldExam.setLoginField2Desc( replacement.getLoginField2Desc() );
-			}
-			if ( replacement.getRegistrationLocked() != oldExam.getRegistrationLocked() ) {
-				oldExam.setRegistrationLocked( replacement.getRegistrationLocked() );
 			}
 			replacement.getCandidates().forEach( candidate -> {
 				for ( Candidate oldCandidate : oldExam.getCandidates() ) {

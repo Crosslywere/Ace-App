@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.ace.app.dto.CreateCandidateDTO;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Jude Ogboru
  * @version 0.0.1-SNAPSHOT
  */
+@Async
 @Service
 @Slf4j
 public class NotificationSenderServiceImpl implements NotificationSenderService {
@@ -44,11 +46,10 @@ public class NotificationSenderServiceImpl implements NotificationSenderService 
 		mailSender.send( message );
 	}
 
-
 	@Override
-	public boolean sendMail( Candidate candidate ) {
+	public void sendMail( Candidate candidate ) {
 		if ( candidate == null || candidate.getEmail() == null ) {
-			return false;
+			return;
 		}
 		String toEmail = candidate.getEmail();
 		String subject = "Ace Training Center " + candidate.getExam().getTitle() + " Exam";
@@ -62,15 +63,13 @@ public class NotificationSenderServiceImpl implements NotificationSenderService 
 		body += "Exam Ends:" + TIME_FORMAT.format( candidate.getExam().getEndTime() );
 		try {
 			sendMail( toEmail, subject, body );
-			return true;
 		} catch ( Exception e ) {
 			log.error( e.getMessage() );
-			return false;
 		}
 	}
 
 	@Override
-	public <C extends CreateCandidateDTO, E extends CreateExamDTO> boolean sendMail( C candidateDTO, E examDTO ) {
+	public <C extends CreateCandidateDTO, E extends CreateExamDTO> void sendMail( C candidateDTO, E examDTO ) {
 		if ( candidateDTO != null && !candidateDTO.getEmail().isBlank() ) {
 			String to = candidateDTO.getEmail();
 			String subject = "Ace Training Center " + examDTO.getTitle() + " Exam";
@@ -85,11 +84,8 @@ public class NotificationSenderServiceImpl implements NotificationSenderService 
 				sendMail( to, subject, body );
 			} catch ( Exception e ) {
 				log.error( e.getMessage() );
-				return false;
 			}
-			return true;
 		}
-		return false;
 	}
 
 }

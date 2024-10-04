@@ -26,9 +26,12 @@
 	<title>Error</title>
 </head>
 <body class="offwhite-bg">
+	<div class="border-bottom flex-row justify-between align-center white-bg" style="padding:36px 72px 24px;">
+		<a th:href="@{/}" class="logo flex-row align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+	</div>
 	<div class="error-container border br-16 white-bg">
 		<h2 class="text-center">An Error Occured!</h2>
-		<p class="text-center" style="overflow-x:auto"><b>Reason:</b> <span th:text="${errorMessage == null ? message : errorMessage}"></span></p>
+		<p class="text-center"><b>Reason:</b> <span th:text="${errorMessage == null ? message : errorMessage}"></span></p>
 		<p class="text-center"><b>Error on page:</b> <span th:text="${path}"></span></p>
 		<th:block th:if="${errorMessage != null}">
 			<p class="text-center">Please see invigilator to resolve this issue if it persists!</p>

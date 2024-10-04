@@ -11,6 +11,18 @@ import com.ace.app.dto.UnverifiedCandidateDTO;
  */
 public interface CandidateService {
 
+	/**
+	 * 
+	 * @param candidate
+	 */
+	void update( Candidate candidate );
+
+	/***
+	 * 
+	 * @param candidateDTO
+	 * @return
+	 * @throws CandidateException
+	 */
 	Candidate login( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
 
 	/**

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ace.app.dto.ExamCandidateDTO;
-import com.ace.app.dto.RegisterCandidateDTO;
+import com.ace.app.dto.UnverifiedCandidateDTO;
 import com.ace.app.entity.Candidate;
 import com.ace.app.entity.CandidateQuestionAnswerMapper;
 import com.ace.app.entity.Exam;
@@ -44,7 +44,110 @@ public class CandidateServiceImpl implements CandidateService {
 	private CandidateQuestionAnswerMapperRepository candidateQuestionAnswerMapperRepository;
 
 	@Override
-	public Candidate putCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException {
+	public void update( Candidate candidate ) {
+		if ( candidate == null ) {
+			return;
+		}
+		candidateRepository.findById( candidate.getCandidateId() ).ifPresent( ( c ) -> candidateRepository.save( candidate ) );
+	}
+
+	// Logs in a candidate if they are valid else throws an error and returns the user back to the login page
+	@Override
+	public Candidate login( UnverifiedCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
+			throw new CandidateException( "Unable to get candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+		.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Invalid exam selected. Exam no longer holding.", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		var candidate = candidateRepository.findById( candidateDTO, exam )
+		.orElseThrow( () -> new CandidateException( "Invalid credentials", CandidateExceptionRedirect.LOGIN_PAGE ) );
+		if ( candidate.getSubmitted() ) {
+			throw new CandidateException( "Already concluded", CandidateExceptionRedirect.LOGIN_PAGE );
+		}
+		if ( candidate.getHasLoggedIn() ) {
+			throw new CandidateException( "Already logged in", CandidateExceptionRedirect.LOGIN_PAGE );
+		}
+		candidate.setHasLoggedIn( true );
+		// No need since the updating of exams already adds to the candidate's papernames
+		// exam.getPapers().forEach( paper -> {
+		// 	if ( paper.getManditory() && !candidate.getPapers().contains( paper ) ) {
+		// 		// appendQuestions( candidate, paper );
+		// 		candidate.getPapers().add( paper );
+		// 	}
+		// } );
+		candidate.getPapernames().forEach( papername -> {
+			var paper = paperRepository.findById( papername, exam ).orElse( null );
+			if ( paper == null ) {
+				candidate.getPapernames().remove( papername );
+			} else {
+				appendQuestions( candidate, paper );
+			}
+		} );
+		// candidate.getPapers().forEach( paper -> appendQuestions( candidate, paper ) );
+		return candidateRepository.save( candidate );
+	}
+
+	public void submitQuestion( ExamCandidateDTO candidateDTO ) throws CandidateException {
+		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
+			throw new CandidateException( "Unable to get candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+			.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		Candidate candidate = candidateRepository.findById( candidateDTO, exam )
+			.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.LOGIN_PAGE ) );
+		if ( candidate.getSubmitted() ) {
+			throw new CandidateException( "Already submitted", CandidateExceptionRedirect.SUBMITTED );
+		}
+		// If the candidate doesn't hava a time used or is less than the database's candidate time used
+		if ( candidateDTO.getTimeUsed() == null || candidateDTO.getTimeUsed() < candidate.getTimeUsed() ) {
+			return;
+		}
+		Paper paper = paperRepository.findById( candidateDTO.getCurrentPaperName(), exam )
+			.orElseThrow( () -> new CandidateException( "Invalid paper (Do not modify hidden inputs)", CandidateExceptionRedirect.ERROR ) );
+		CandidateQuestionAnswerMapper mapper = candidateQuestionAnswerMapperRepository.findById( candidateDTO.getCurrentPaperQuestionNumber(), candidate, paper )
+			.orElseThrow( () -> new CandidateException( "Invalid question number (Do not modify hidden inputs)", CandidateExceptionRedirect.ERROR ) );
+		mapper.setAnswerIndex( candidateDTO.getCurrentAnswerIndex() );
+		candidateQuestionAnswerMapperRepository.save( mapper );
+		candidate.setTimeUsed( candidate.getTimeUsed() );
+		if ( candidate.getTimeUsed() >= exam.getDuration() ) {
+			candidate.setSubmitted( true );
+			candidateRepository.save( candidate );
+			return;
+		}
+		candidateRepository.save( candidate );
+	}
+
+	public ExamCandidateDTO getRequestedQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException {
+		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
+			throw new CandidateException( "Unable to get candidate", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Exam exam = examRepository.findById( candidateDTO.getExamId() )
+			.orElseThrow( () -> new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT ) );
+		if ( exam.getState() != ExamState.Ongoing ) {
+			throw new CandidateException( "Exam is not ongoing", CandidateExceptionRedirect.EXAM_SELECT );
+		}
+		Candidate candidate = candidateRepository.findById( candidateDTO, exam )
+		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.LOGIN_PAGE ) );
+		if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
+			candidate.setSubmitted( true );
+			// TODO Update candidate score
+			candidateRepository.save( candidate );
+			throw new CandidateException( "Time concluded", CandidateExceptionRedirect.SUBMITTED );
+		}
+		Paper paper = paperRepository.findById( paperName, exam ).orElse( null );
+		if ( paper == null ) {
+			throw new CandidateException( "Invalid paper", CandidateExceptionRedirect.ERROR );
+		}
+		CandidateQuestionAnswerMapper mapper = candidateQuestionAnswerMapperRepository.findById( questionNumber,  candidate, paper )
+			.orElseThrow( () -> new CandidateException( "Invalid question", CandidateExceptionRedirect.ERROR ) );
+		return new ExamCandidateDTO( candidate, mapper );
+	}
+
+	@Override
+	public Candidate putCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException {
 		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
 			throw new CandidateException( "Unable to get candidate", CandidateExceptionRedirect.EXAM_SELECT );
 		}
@@ -54,7 +157,7 @@ public class CandidateServiceImpl implements CandidateService {
 			throw new CandidateException( "Invalid exam selected. Exam no longer holding.", CandidateExceptionRedirect.EXAM_SELECT );
 		}
 		Candidate tempCandidate = new Candidate( candidateDTO, exam );
-		if ( exam.getRegistrationLocked() ) {
+		// if ( exam.getRegistrationLocked() ) {
 			Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
 			if ( candidate != null && !candidate.getHasLoggedIn() && !candidate.getSubmitted() ) {
 				return candidate;
@@ -63,20 +166,20 @@ public class CandidateServiceImpl implements CandidateService {
 			} else {
 				throw new CandidateException( "Invalid credentials", CandidateExceptionRedirect.LOGIN_PAGE );
 			}
-		} else {
-			Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
-			if ( candidate != null && !candidate.getHasLoggedIn() && !candidate.getSubmitted() ) {
-				return candidate;
-			} else if ( candidate != null && ( candidate.getHasLoggedIn() || candidate.getSubmitted() ) ) {
-				throw new CandidateException( "Already logged in", CandidateExceptionRedirect.LOGIN_PAGE );
-			} else {
-				return candidateRepository.save( tempCandidate );
-			}
-		}
+		// } else {
+		// 	Candidate candidate = candidateRepository.findById( tempCandidate.getCandidateId() ).orElse( null );
+		// 	if ( candidate != null && !candidate.getHasLoggedIn() && !candidate.getSubmitted() ) {
+		// 		return candidate;
+		// 	} else if ( candidate != null && ( candidate.getHasLoggedIn() || candidate.getSubmitted() ) ) {
+		// 		throw new CandidateException( "Already logged in", CandidateExceptionRedirect.LOGIN_PAGE );
+		// 	} else {
+		// 		return candidateRepository.save( tempCandidate );
+		// 	}
+		// }
 	}
 
 	@Override
-	public Candidate loginCandidate( RegisterCandidateDTO candidateDTO ) throws CandidateException {
+	public Candidate loginCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException {
 		if ( candidateDTO == null || candidateDTO.getExamId() == null ) {
 			throw new CandidateException( "Invalid exam selected", CandidateExceptionRedirect.EXAM_SELECT );
 		}
@@ -90,48 +193,50 @@ public class CandidateServiceImpl implements CandidateService {
 		if ( candidate.getSubmitted() ) {
 			throw new CandidateException( "This candidate has already submitted", CandidateExceptionRedirect.SUBMITTED );
 		}
-		if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
-			candidate.getPapers().clear();
-			candidateDTO.getPaperNames().forEach( paperName -> {
-				Paper paper = paperRepository.findById( new PaperId( exam, paperName ) ).orElse( null );
-				if ( paper != null ) {
-					candidate.getPapers().add( paper );
-				}
-			} );
-			if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
-				throw new CandidateException( "Invalid number of papers selected", CandidateExceptionRedirect.PAPER_SELECT );
-			} else {
-				for ( Paper paper : exam.getPapers() ) {
-					if ( paper.getManditory() ) {
-						if ( !candidate.getPapers().contains( paper ) ) {
-							throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionRedirect.PAPER_SELECT );
-						}
-					}
-				}
-				candidate.setHasLoggedIn( true );
-				candidate.getPapers().forEach( paper -> {
-					appendQuestions( candidate, paper );
-				} );
-				return candidateRepository.save( candidate );
-			}
-		} else {
-			for ( Paper paper : exam.getPapers() ) {
-				if ( paper.getManditory() ) {
-					if ( !candidate.getPapers().contains( paper ) ) {
-						throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionRedirect.PAPER_SELECT );
-					}
-				}
-			}
-			candidate.setHasLoggedIn( true );
-			if ( candidate.getAnswerMapper() == null || candidate.getAnswerMapper().size() == 0 ) {
-				candidate.getPapers().forEach( paper -> {
-					appendQuestions( candidate, paper );
-				} );
-			}
-			return candidateRepository.save( candidate );
-		}
+		// if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
+		// 	candidate.getPapers().clear();
+		// 	candidateDTO.getPaperNames().forEach( paperName -> {
+		// 		Paper paper = paperRepository.findById( new PaperId( exam, paperName ) ).orElse( null );
+		// 		if ( paper != null ) {
+		// 			candidate.getPapers().add( paper );
+		// 		}
+		// 	} );
+		// 	if ( candidate.getPapers().size() != exam.getPapersPerCandidate() ) {
+		// 		throw new CandidateException( "Invalid number of papers selected", CandidateExceptionRedirect.PAPER_SELECT );
+		// 	} else {
+		// 		for ( Paper paper : exam.getPapers() ) {
+		// 			if ( paper.getManditory() ) {
+		// 				if ( !candidate.getPapers().contains( paper ) ) {
+		// 					throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionRedirect.PAPER_SELECT );
+		// 				}
+		// 			}
+		// 		}
+		// 		candidate.setHasLoggedIn( true );
+		// 		candidate.getPapers().forEach( paper -> {
+		// 			appendQuestions( candidate, paper );
+		// 		} );
+		// 		return candidateRepository.save( candidate );
+		// 	}
+		// } else {
+		// 	for ( Paper paper : exam.getPapers() ) {
+		// 		if ( paper.getManditory() ) {
+		// 			if ( !candidate.getPapers().contains( paper ) ) {
+		// 				throw new CandidateException( "Please select manditory paper(" + paper.getName() + ")", CandidateExceptionRedirect.PAPER_SELECT );
+		// 			}
+		// 		}
+		// 	}
+		// 	candidate.setHasLoggedIn( true );
+		// 	if ( candidate.getAnswerMapper() == null || candidate.getAnswerMapper().size() == 0 ) {
+		// 		candidate.getPapers().forEach( paper -> {
+		// 			appendQuestions( candidate, paper );
+		// 		} );
+		// 	}
+		// 	return candidateRepository.save( candidate );
+		// }
+		return null;
 	}
 
+	@Override
 	public ExamCandidateDTO submitQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException {
 		if ( candidateDTO == null ) {
 			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
@@ -150,6 +255,7 @@ public class CandidateServiceImpl implements CandidateService {
 		return getQuestion( candidate, exam, paperName, questionNumber );
 	}
 
+	@Override
 	public void answerQuestion( ExamCandidateDTO candidateDTO ) throws CandidateException {
 		if ( candidateDTO == null ) {
 			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
@@ -162,15 +268,17 @@ public class CandidateServiceImpl implements CandidateService {
 		Candidate candidate = candidateRepository.findById( candidateDTO.getCandidateId( exam ) )
 		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
 		if ( candidate.getSubmitted() ) {
-			if ( candidate.getScore() < 0 ) {
-				Candidate.score( candidate );
-				candidateRepository.save( candidate );
-			}
+			// TODO Remove score code
+			// if ( candidate.getScore() < 0 ) {
+			// 	Candidate.score( candidate );
+			// 	candidateRepository.save( candidate );
+			// }
 			return;
 		}
 		updateQuestion( candidateDTO, candidate, exam );
 	}
 
+	@Override
 	public ExamCandidateDTO getExamCandidateQuestion( ExamCandidateDTO candidateDTO, String paperName, Integer questionNumber ) throws CandidateException {
 		if ( candidateDTO == null ) {
 			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
@@ -184,9 +292,10 @@ public class CandidateServiceImpl implements CandidateService {
 		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
 		if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
 			candidate.setSubmitted( true );
-			if ( candidate.getScore() < 0 ) {
-				Candidate.score( candidate );
-			}
+			// TODO Remove score code
+			// if ( candidate.getScore() < 0 ) {
+			// 	Candidate.score( candidate );
+			// }
 			candidateRepository.save( candidate );
 			throw new CandidateException( "Time concluded", CandidateExceptionRedirect.EXAM_SELECT );
 		}
@@ -201,6 +310,7 @@ public class CandidateServiceImpl implements CandidateService {
 		return new ExamCandidateDTO( candidate, map );
 	}
 
+	@Override
 	public Candidate submitExam( ExamCandidateDTO candidateDTO ) throws CandidateException {
 		if ( candidateDTO == null ) {
 			throw new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT );
@@ -214,13 +324,14 @@ public class CandidateServiceImpl implements CandidateService {
 		.orElseThrow( () -> new CandidateException( "Invalid candidate", CandidateExceptionRedirect.EXAM_SELECT ) );
 		if ( !candidate.getSubmitted() ) {
 			candidate.setSubmitted( true );
-			Candidate.score( candidate );
+			// Candidate.score( candidate );
 			return candidateRepository.save( candidate );
 		} else {
-			if ( candidate.getScore() < 0 ) {
-				Candidate.score( candidate );
-				candidateRepository.save( candidate );
-			}
+			// TODO Remove score code
+			// if ( candidate.getScore() < 0 ) {
+			// 	Candidate.score( candidate );
+			// 	candidateRepository.save( candidate );
+			// }
 			throw new CandidateException( "Candidate has already submitted!", CandidateExceptionRedirect.SUBMITTED );
 		}
 	}
@@ -247,9 +358,10 @@ public class CandidateServiceImpl implements CandidateService {
 	private ExamCandidateDTO getQuestion( Candidate candidate, Exam exam, String paperName, Integer questionNumber) throws CandidateException {
 		if ( candidate.getTimeUsed() >= exam.getDuration() * 60 ) {
 			candidate.setSubmitted( true );
-			if ( candidate.getScore() < 0 ) {
-				Candidate.score( candidate );
-			}
+			// TODO Remove score code
+			// if ( candidate.getScore() < 0 ) {
+			// 	Candidate.score( candidate );
+			// }
 			candidateRepository.save( candidate );
 			throw new CandidateException( "Time concluded", CandidateExceptionRedirect.SUBMITTED );
 		}
@@ -259,10 +371,11 @@ public class CandidateServiceImpl implements CandidateService {
 			// Paper doesn't exist
 			throw new CandidateException( "Invalid paper", CandidateExceptionRedirect.EXAM_SELECT );
 		}
-		if ( candidate.getSubmitted() && candidate.getScore() < 0 ) {
-			Candidate.score( candidate );
-			candidateRepository.save( candidate );
-		}
+		// TODO Remove score code
+		// if ( candidate.getSubmitted() && candidate.getScore() < 0 ) {
+		// 	Candidate.score( candidate );
+		// 	candidateRepository.save( candidate );
+		// }
 		CandidateQuestionAnswerMapper map = candidateQuestionAnswerMapperRepository.findById( new CandidateQuestionAnswerMapperId( questionNumber, candidate, paper ) )
 		.orElseThrow( () -> new CandidateException( "Invalid question", CandidateExceptionRedirect.ERROR ) );
 		return new ExamCandidateDTO( candidate, map );

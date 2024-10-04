@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public final class CreatePaperDTO extends BasePaperDTO {
+public class CreatePaperDTO extends BasePaperDTO {
 
 	private List<CreateQuestionDTO> questions = new ArrayList<>();
 

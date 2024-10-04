@@ -9,6 +9,7 @@ import com.ace.app.dto.CreateExamDTO;
 import com.ace.app.dto.ModifyOExamDTO;
 import com.ace.app.dto.ModifySExamDTO;
 import com.ace.app.model.CandidateField;
+import com.ace.app.model.CandidateId;
 import com.ace.app.model.ExamState;
 
 import jakarta.persistence.CascadeType;
@@ -70,7 +71,7 @@ public class Exam {
 	@Column( nullable = false )
 	private Integer papersPerCandidate = 1;
 
-	private Boolean registrationLocked = false;
+	// private Boolean registrationLocked = false;
 
 	@Column( nullable = false )
 	@Enumerated( EnumType.ORDINAL )
@@ -114,13 +115,19 @@ public class Exam {
 		} );
 		candidates = new ArrayList<>();
 		examDTO.getCandidates().forEach( candidateDTO -> {
-			Candidate candidate = new Candidate( candidateDTO, this );
-			candidate.setEmail( candidateDTO.getEmail() );
-			candidate.setPhoneNumber( candidateDTO.getPhoneNumber() );
-			candidate.setNotified( candidateDTO.getNotified() );
+			Candidate candidate = Candidate.builder()
+				.candidateId( new CandidateId( this, candidateDTO.getField1(), examDTO.getLoginField2() == CandidateField.None ? "" : candidateDTO.getField2() ) )
+				.firstname( candidateDTO.getFirstname() )
+				.lastname( candidateDTO.getLastname() )
+				.othername( candidateDTO.getOthername() )
+				.papernames( candidateDTO.getPapernames() )
+				.email( candidateDTO.getEmail() )
+				.phoneNumber( candidateDTO.getPhoneNumber() )
+				.state( candidateDTO.getState() )
+				.build();
 			candidates.add( candidate );
 		} );
-		registrationLocked = !candidates.isEmpty();
+		// registrationLocked = !candidates.isEmpty();
 	}
 
 	public Exam( ModifySExamDTO examDTO ) {
@@ -153,7 +160,6 @@ public class Exam {
 			Candidate candidate = new Candidate( candidateDTO, this );
 			candidate.setEmail( candidateDTO.getEmail() );
 			candidate.setPhoneNumber( candidateDTO.getPhoneNumber() );
-			candidate.setNotified( candidateDTO.getNotified() );
 			candidates.add( candidate );
 		} );
 		examDTO.getModifyCandidates().forEach( candidateDTO -> {
@@ -172,7 +178,7 @@ public class Exam {
 		loginField1Desc = examDTO.getLoginField1Desc();
 		loginField2 = examDTO.getLoginField2();
 		loginField2Desc = examDTO.getLoginField2Desc();
-		registrationLocked = examDTO.getRegistrationLocked();
+		// registrationLocked = examDTO.getRegistrationLocked();
 		candidates = new ArrayList<>();
 		examDTO.getCandidates().forEach( candidateDTO -> {
 			candidates.add( new Candidate( candidateDTO, this ) );

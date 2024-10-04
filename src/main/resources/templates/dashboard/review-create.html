@@ -47,31 +47,31 @@
 					<label>
 						TITLE
 						<br>
-						<input type="text" th:field="*{title}" class="border br-16">
+						<input type="text" th:field="*{title}" class="border br-16" required>
 					</label>
 					<br>
 					<div class="flex-row justify-between">
 						<label>
 							START TIME
 							<br>
-							<input type="time" th:field="*{startTime}" class="text-center border br-16">
+							<input type="time" th:field="*{startTime}" class="text-center border br-16" required>
 						</label>
 						<label>
 							END TIME
 							<br>
-							<input type="time" th:field="*{endTime}" class="text-center border br-16">
+							<input type="time" th:field="*{endTime}" class="text-center border br-16" required>
 						</label>
 					</div>
 					<label>
 						SCHEDULED DATE
 						<br>
-						<input type="date" th:field="*{scheduledDate}" th:min="*{MIN_DATE}" class="text-center border br-16">
+						<input type="date" th:field="*{scheduledDate}" th:min="*{MIN_DATE}" class="text-center border br-16" required>
 					</label>
 					<br>
 					<label>
 						DURATION
 						<br>
-						<input type="number" th:field="*{duration}" class="text-center border br-16">
+						<input type="number" th:field="*{duration}" class="text-center border br-16" required>
 					</label>
 					<br>
 					<label id="slider">
@@ -85,7 +85,7 @@
 					<br><br>
 					<label>
 						PAPERS PER CANDIDATE
-						<input type="number" th:field="*{papersPerCandidate}" th:max="*{#lists.size(papers)}" min="1" class="text-center border br-16">
+						<input type="number" th:field="*{papersPerCandidate}" th:max="*{#lists.size(papers)}" min="1" class="text-center border br-16" required>
 					</label>
 					<br>
 					<label>
@@ -158,30 +158,73 @@
 						</label>
 					</label>
 					<div th:if="*{#lists.size(candidates) > 0}" id="candidate-details" style="margin-bottom:24px;">
+						<th:block th:if="*{hasEmail}">
+							<label>
+								<input type="checkbox" th:field="*{sendEmail}">
+								SEND NOTIFICATION EMAIL ON CREATION
+							</label>
+							<br><br>
+						</th:block>
 						<details>
-							<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px">Candidate List</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
-							<table class="width-100">
-								<thead>
-									<tr>
-										<th>Field 1 Values</th>
-										<th>Field 2 Values</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr th:each="candidate, candidateStat : *{candidates}">
-										<td class="text-center">
-											<span th:text="${candidate.field1}"></span>
-											<input type="text" th:field="*{candidates[__${candidateStat.index}__].field1}" hidden>
-										</td>
-										<td class="text-center">
-											<span th:text="${candidate.field2}"></span>
-											<input type="text" th:field="*{candidates[__${candidateStat.index}__].field2}" hidden>
-										</td>
-										<input type="email" th:field="*{candidates[__${candidateStat.index}__].email}" hidden>
-										<input type="tel" th:field="*{candidates[__${candidateStat.index}__].phoneNumber}" hidden>
-									</tr>
-								</tbody>
-							</table>
+							<summary class="width-100 br-16 flex-row justify-between align-center" style="background-color:#0F29420A;padding:12px 16px">Candidate List <th:block th:text="|- (*{#lists.size(candidates)})|"></th:block></span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+							<div style="overflow-x:scroll;">
+								<table class="width-100">
+									<thead>
+										<tr>
+											<th>Field 1 Values</th>
+											<th>Field 2 Values</th>
+											<th th:if="*{hasEmail}">Email</th>
+											<th th:if="*{hasPhoneNumber}">Phone number</th>
+											<th:block th:if="*{hasName}">
+												<th>First Name</th>
+												<th>Last Name</th>
+												<th>Other Name</th>
+											</th:block>
+											<th>Papers</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="candidate, candidateStat : *{candidates}">
+											<td class="text-center">
+												<span th:text="${candidate.field1}"></span>
+												<input type="text" th:field="*{candidates[__${candidateStat.index}__].field1}" hidden>
+											</td>
+											<td class="text-center">
+												<span th:text="${candidate.field2}"></span>
+												<input type="text" th:field="*{candidates[__${candidateStat.index}__].field2}" hidden>
+											</td>
+											<td class="text-center" th:if="*{hasEmail}">
+												<span th:text="${candidate.email}"></span>
+												<input type="email" th:field="*{candidates[__${candidateStat.index}__].email}" hidden>
+											</td>
+											<td class="text-center" th:if="*{hasPhoneNumber}">
+												<span th:text="${candidate.phoneNumber}"></span>
+												<input type="tel" th:field="*{candidates[__${candidateStat.index}__].phoneNumber}" hidden>
+											</td>
+											<th:block th:if="*{hasName}">
+												<td class="text-center">
+													<span th:text="${candidate.firstname}"></span>
+													<input type="text" th:field="*{candidates[__${candidateStat.index}__].firstname}" hidden>
+												</td>
+												<td class="text-center">
+													<span th:text="${candidate.lastname}"></span>
+													<input type="text" th:field="*{candidates[__${candidateStat.index}__].lastname}" hidden>
+												</td>
+												<td class="text-center">
+													<span th:text="${candidate.othername}"></span>
+													<input type="text" th:field="*{candidates[__${candidateStat.index}__].othername}" hidden>
+												</td>
+											</th:block>
+											<td class="text-center">
+												<th:block th:each="papername,papernameStat : ${candidate.papernames}">
+													<span th:text="|${papername}, |"></span>
+													<input type="text" th:field="*{candidates[__${candidateStat.index}__].papernames[__${papernameStat.index}__]}" hidden>
+												</th:block>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
 						</details>
 					</div>
 					<div class="flex justify-between">

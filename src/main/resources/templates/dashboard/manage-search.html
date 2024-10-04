@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="refresh" content="15">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<link rel="stylesheet" th:href="@{/css/dashboard.css}">
+	<title th:text="|Manage ${exam.title}|">Manage</title>
+	<style>
+		.container {
+			width:808px;
+		}
+		td, td * {
+			text-align: center;
+		}
+	</style>
+</head>
+<body class="offwhite-bg">
+	<div class="flex-row" style="height:fit-content">
+		<div class="menu flex-col align-center white-bg">
+			<a th:href="@{/}" class="logo flex-row justify-center align-center"><img th:src="@{/images/AITC Logo(small).png}" alt="Logo" width="32" height="32" class="mr-8">ACE EXAM PLATFORM</a>
+			<details open>
+				<summary class="flex-row justify-between align-center br-16" style="width:271px;background-color:#0F29420A;padding:12px 16px;"><span class="flex align-center"><img th:src="@{/images/dashboard-icon.svg}" alt="dashboard-icon" class="mr-8">Dashboard</span><img th:src="@{/images/arrow-down-round.svg}" alt="arrow-down"></summary>
+				<ul style="list-style:none;margin:15px 0 0 25px;padding-left:23px;" class="border-left">
+					<li><a th:href="@{/scheduled}">Currently Scheduled Exam</a></li>
+					<li><a th:href="@{/recorded}">Exam Record</a></li>
+					<li><a th:href="@{/ongoing}" class="blue-text">Ongoing Exams</a></li>
+					<li><a th:href="@{/create}">Create New Exam</a></li>
+				</ul>
+			</details>
+		</div>
+		<div class="flex-col align-center width-minus-menu">
+			<div class="fit-height white-bg width-100 border-bottom">
+				<div class="container flex-row justify-between align-center" style="margin:19px auto;">
+					<form th:action="@{/search}" method="post" style="position:relative">
+						<input type="text" name="search" placeholder="Search Exams By Title" class="border br-16">
+						<button type="submit" class="none-btn" style="position:absolute;top:10px;right:14px;cursor:pointer;"><img th:src="@{/images/search.svg}" alt="Search"></button>
+					</form>
+					<a th:href="@{/create}" class="blue-text"><img th:src="@{/images/add.svg}" alt="create" style="vertical-align:middle;" class="mr-8">Create Exam</a>
+				</div>
+			</div>
+			<div class="container white-bg br-16 border flex-col fit-height" style="margin-top:40px;overflow-x:auto	;">
+				<table>
+					<thead>
+						<th>Field1</th>
+						<th>Time Used</th>
+						<th>Attempted</th>
+						<th>Status</th>
+					</thead>
+					<tbody>
+						<tr th:each="candidate : ${candidates}">
+							<td th:text="${candidate.field1}"></td>
+							<td th:class="${candidate.timeUsed > 0 ? 'timeView' : ''}" th:text="${candidate.timeUsed > 0 ? candidate.timeUsed : 'N/A'}"></td>
+							<td >N/A</td>
+							<td>
+								<a th:if="${!candidate.submitted && candidate.hasLoggedIn}" th:href="@{/allow(examId=${exam.examId},field1=${candidate.field1},field2=${candidate.field2})}">Allow Re-entry</a>
+								<span th:if="${candidate.submitted}">Submitted</span>
+								<span th:if="${!candidate.hasLoggedIn}">Not Logged In</span>
+							</td>
+						</tr>
+						<tr th:if="${#lists.size(exam.candidates) == 0}">
+							<td clospan="4">No candidates found</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script>
+		window.addEventListener("DOMContentLoaded", () => {
+			const timeWriter = (t) => {
+				let h = Math.floor(t % (60 * 60 * 24) / (60 * 60))
+				let m = Math.floor(t % (60 * 60) / 60)
+				let s = Math.floor(t % 60)
+				return (h > 0 ? h + ':' : '') + (m >= 10 ? m : '0' + m) + ':' + (s >= 10 ? s : '0' + s)
+			}
+			const timeViews = document.getElementsByClassName("timeView")
+			Array.prototype.slice.call(timeViews, 0).forEach(elem => {
+				const time = parseFloat(elem.innerHTML)
+				elem.innerHTML = timeWriter(time)
+			})
+		})
+	</script>
+</body>
+</html>
