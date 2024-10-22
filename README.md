@@ -4,8 +4,6 @@ Go to [starter.spring.io](https://start.spring.io/#!type=maven-project&language=
 
 Also go to [e-iceblue](https://www.e-iceblue.com/Download/doc-for-java-free.html) for Spire.Doc dependency for reading .docx/.doc files.
 
-And go to [twilio](https://www.twilio.com) for Twilio SMS messaging.
-
 ## TODO List
 
 1. Once an examinee has signed in and started the exam they should be prevented from signing in again.
@@ -42,26 +40,6 @@ And go to [twilio](https://www.twilio.com) for Twilio SMS messaging.
 
 This application is a web based application, meaning you would be needing a browser to interact with it.
 (The design is strictly for desktop.)
-
-### INSTALL
-
-This application relies on [Java-21(LTS)](https://www.oracle.com/java/technologies/downloads/#java21) and [Docker](https://www.docker.com) to be fully utilized.
-
-Once Java has been installed, use the following command to compile the project for your particular operating system. (Note you will have to be in the projects directory in the shell program)
-
-__Linux__
-```bash
-./mvnw clean install
-```
-
-__Windows__
-```cmd
-.\mvnw.cmd clean install
-```
-
-Once this is completed you will then need to have Docker installed to set up the application fully.
-
-Do this by using the following command in your shell/command prompt application. (Note you will have to be in the projects directory in the shell program)
 
 __To start the application__
 ```
