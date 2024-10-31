@@ -25,9 +25,9 @@ import lombok.Setter;
 public class CandidateId implements Serializable {
 
 	@ManyToOne
-	Exam exam;
+	private Exam exam;
 
-	String field1;
+	private String field1;
 
-	String field2;
+	private String field2;
 }

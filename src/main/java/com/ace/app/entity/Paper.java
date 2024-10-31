@@ -41,9 +41,6 @@ public class Paper {
 
 	private Boolean manditory;
 
-	// @ManyToMany( mappedBy = "papers", cascade = { CascadeType.DETACH } )
-	// private List<Candidate> candidates;
-
 	public Paper( CreatePaperDTO paperDTO, Exam exam ) {
 		paperId = new PaperId( exam, paperDTO.getName() );
 		questionsPerCandidate = paperDTO.getQuestionsPerCandidate();

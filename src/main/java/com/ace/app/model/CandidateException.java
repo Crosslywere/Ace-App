@@ -7,7 +7,7 @@ import lombok.Getter;
  * @version 0.0.1-SNAPSHOT
  */
 @Getter
-public class CandidateException extends Exception {
+public class CandidateException extends RuntimeException {
 
 	private CandidateExceptionRedirect redirect;
 

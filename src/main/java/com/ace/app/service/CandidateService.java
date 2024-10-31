@@ -17,7 +17,7 @@ public interface CandidateService {
 	 */
 	void update( Candidate candidate );
 
-	/***
+	/**
 	 * 
 	 * @param candidateDTO
 	 * @return
@@ -29,17 +29,9 @@ public interface CandidateService {
 	 * 
 	 * @param candidateDTO
 	 * @return
-	 * @throws CustomException
+	 * @throws CandidateException
 	 */
 	Candidate putCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
-
-	/**
-	 * 
-	 * @param candidateDTO
-	 * @return
-	 * @throws CustomException
-	 */
-	Candidate loginCandidate( UnverifiedCandidateDTO candidateDTO ) throws CandidateException;
 
 	/**
 	 * 

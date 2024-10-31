@@ -59,7 +59,7 @@
 						<tr th:each="candidate : ${exam.candidates}">
 							<td th:text="${candidate.field1}"></td>
 							<td th:class="${candidate.timeUsed > 0 ? 'timeView' : ''}" th:text="${candidate.timeUsed > 0 ? candidate.timeUsed : 'N/A'}"></td>
-							<td>0</td>
+							<td th:text="${candidate.attempted}"></td>
 							<td>
 								<a th:if="${!candidate.submitted && candidate.hasLoggedIn}" th:href="@{/allow(examId=${exam.examId},field1=${candidate.field1},field2=${candidate.field2})}">Allow Re-entry</a>
 								<span th:if="${candidate.submitted}" class="danger-btn">Submitted</span>

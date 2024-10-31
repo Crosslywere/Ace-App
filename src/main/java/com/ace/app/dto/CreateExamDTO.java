@@ -64,7 +64,7 @@ public class CreateExamDTO extends BaseExamDTO {
 		InputStream stream = null;
 		try {
 			stream = paperDocument.getInputStream();
-		} catch ( IOException e) {
+		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
 		if ( stream == null ) {
@@ -169,7 +169,7 @@ public class CreateExamDTO extends BaseExamDTO {
 						line = scn.nextLine().trim();
 					} else {
 						retry = true;
-						// Put the paper into the into the list
+						// Put the paper into the list
 						currentPaper.getQuestions().add( question );
 						if ( question.getAnswerIndex() == null ) {
 							self.setShowResult( false );
@@ -196,7 +196,7 @@ public class CreateExamDTO extends BaseExamDTO {
 						}
 					}
 					// If the line matches an answer eg Ans: e Or ans: a
-					else if ( line.matches( "^[Aa]ns:[\\s]*[A-Ea-e]" ) && !handled ) {
+					else if ( line.matches("^[Aa]ns:\\s*[A-Ea-e]" ) && !handled ) {
 						handled = true;
 						int answerIndex = line.replaceAll( "^[Aa]ns:", "" ).trim().toLowerCase().charAt( 0 ) - 'a';
 						question.setAnswerIndex( ( short )answerIndex );

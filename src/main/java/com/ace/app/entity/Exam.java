@@ -71,8 +71,6 @@ public class Exam {
 	@Column( nullable = false )
 	private Integer papersPerCandidate = 1;
 
-	// private Boolean registrationLocked = false;
-
 	@Column( nullable = false )
 	@Enumerated( EnumType.ORDINAL )
 	private CandidateField loginField1;

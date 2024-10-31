@@ -133,7 +133,7 @@
 					</details>
 					<br>
 					<div class="flex justify-between">
-						<a th:href="@{/manage/{id}/all(id=*{examId})}" class="action-btn br-16">Manage</a>
+						<button formmethod="get" th:formaction="@{/manage/{id}(id=*{examId})}" class="action-btn br-16">Manage</button>
 						<button type="submit" class="action-btn br-16">Review</button>
 					</div>
 				</form>

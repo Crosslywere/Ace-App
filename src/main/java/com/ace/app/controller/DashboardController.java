@@ -219,7 +219,7 @@ public class DashboardController {
 				candidate.setHasLoggedIn( false );
 				candidateService.update( candidate );
 			}
-			return "redirect:/manage/" + examId + "/all";
+			return "redirect:/manage/" + examId;
 		}
 		return "redirect:/exam";
 	}

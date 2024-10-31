@@ -215,6 +215,7 @@ public class CandidateController {
 			return handleCandidateException( e, candidateDTO, exam, model, response );
 		}
 		insertCookies( response, candidateDTO );
+		Candidate.score( candidate );
 		model.addAttribute( "exam", exam );
 		model.addAttribute( "candidate", candidate );
 		model.addAttribute( "rateCandidate", new ExamCandidateRateDTO( candidate ) );

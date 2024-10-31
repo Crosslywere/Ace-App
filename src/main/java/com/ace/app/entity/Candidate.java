@@ -75,6 +75,8 @@ public class Candidate {
 
 	private LocalTime lastUpdate;
 
+	private Integer attempted;
+
 	public Candidate( BaseCandidateDTO candidateDTO, Exam exam ) {
 		this.candidateId = new CandidateId( exam, candidateDTO.getField1(), candidateDTO.getField2() == null ? "" : candidateDTO.getField2() );
 	}
@@ -134,16 +136,20 @@ public class Candidate {
 		}
 	}
 
+	public void incrementAttempted() {
+		if ( attempted == null ) {
+			attempted = 1;
+			return;
+		}
+		attempted++;
+	}
+
 	public static int score( Candidate candidate ) {
 		int score = 0;
-		// for ( CandidateQuestionAnswerMapper answerMapper : candidate.getAnswerMapper() ) {
-		// 	if ( answerMapper.isCorrect() ) {
-		// 		score++;
-		// 	}
-		// }
 		for ( String papername : candidate.getPapernames() ) {
 			score += score( candidate, papername );
 		}
+		candidate.setScore( score );
 		return score;
 	}
 
