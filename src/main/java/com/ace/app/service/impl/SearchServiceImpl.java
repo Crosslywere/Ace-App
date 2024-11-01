@@ -32,10 +32,9 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public List<Candidate> findCandidatesByString( Long examId, String str ) {
 		return candidateRepository.searchByExamIdAndField1( examId, str );
-		// return candidateRepository.findByExamIdAndString( examId, str.toLowerCase() );
 	}
 
 	public Candidate findCandidate( Long examId, String field1, String field2 ) {
-		return null;
+		return candidateRepository.findById( examRepository.findById( examId ).orElse( null ), field1, field2 ).orElse( null );
 	}
 }

@@ -136,8 +136,8 @@ public class DashboardController {
 
 	/**
 	 * Gets a list of exams by their title similar to the search query 
-	 * @param title The title to search for
-	 * @param model  Provided by Springboot to pass arguments to the template
+	 * @param search The title to search for
+	 * @param model  Provided by Spring Boot to pass arguments to the template
 	 * @param request Used to determine if request comes from the server
 	 * @return A template containing results from the search
 	 */
@@ -181,8 +181,8 @@ public class DashboardController {
 	 * @param examId
 	 * @param search
 	 * @param model
-	 * @param request
-	 * @return
+	 * @param request Used to verify that the request if coming from the server
+	 * @return The manage template with the search result
 	 */
 	@GetMapping( "/manage/{examId}/" )
 	public String search( @PathVariable( "examId" ) Long examId, @RequestParam String search, Model model, HttpServletRequest request ) {
@@ -205,14 +205,14 @@ public class DashboardController {
 
 	/**
 	 * 
-	 * @param examId
-	 * @param field1
-	 * @param field2
-	 * @param request
-	 * @return
+	 * @param examId The id of the exam the candidate belongs to
+	 * @param field1 The first field of the candidate
+	 * @param field2 The second field of the candidate
+	 * @param request Used to validate the request is coming from the server
+	 * @return A redirect to the template
 	 */
 	@GetMapping( "/allow" )
-	public String getMethodName( @RequestParam Long examId, @RequestParam String field1, @RequestParam String field2, HttpServletRequest request ) {
+	public String getMethodName( @RequestParam("examId") Long examId, @RequestParam("field1") String field1, @RequestParam("field2") String field2, HttpServletRequest request ) {
 		if ( isLocalhost( request ) ) {
 			Candidate candidate = searchService.findCandidate( examId, field1, field2 );
 			if ( candidate != null ) {
