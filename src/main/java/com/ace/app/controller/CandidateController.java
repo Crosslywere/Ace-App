@@ -22,6 +22,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Base64;
+
 /**
  * @author Ogboru Jude
  * @version 0.0.1-SNAPSHOT
@@ -316,11 +318,11 @@ public class CandidateController {
 	 * @param candidateDTO The candidate with the details to be used
 	 */
 	private void insertCookies( HttpServletResponse response, ExamCandidateDTO candidateDTO, Exam exam ) {
-		String field1 = candidateDTO.getField1().replaceAll( " ", "[32]" );
-		String field2 = candidateDTO.getField2().replaceAll( " ", "[32]" );
+		String field1 = Base64.getEncoder().encodeToString( candidateDTO.getField1().getBytes() );
+		String field2 = Base64.getEncoder().encodeToString( candidateDTO.getField2().getBytes() );
 		int maxAge = ( ( exam.getDuration() + 10 ) * 60 ) - candidateDTO.getTimeUsed().intValue();
 
-		var examIdCookie = new Cookie( COOKIE_NAMES[1], exam.getExamId().toString() );
+		var examIdCookie = new Cookie( COOKIE_NAMES[0], exam.getExamId().toString() );
 		examIdCookie.setMaxAge( maxAge );
 		examIdCookie.setPath( "/" );
 		examIdCookie.setHttpOnly( true );
@@ -357,10 +359,10 @@ public class CandidateController {
 			}
 			if ( candidateDTO != null ) {
 				if ( cookie.getName().equals( COOKIE_NAMES[1] ) ) {
-					candidateDTO.setField1( cookie.getValue().replaceAll( "\\[[3][2]\\]", " " ) );
+					candidateDTO.setField1( new String( Base64.getDecoder().decode( cookie.getValue() ) ) );
 				}
 				if ( cookie.getName().equals( COOKIE_NAMES[2] ) ) {
-					candidateDTO.setField2( cookie.getValue().replaceAll( "\\[[3][2]\\]", " " ) );
+					candidateDTO.setField2( new String( Base64.getDecoder().decode( cookie.getValue() ) ) );
 				}
 			}
 		}
