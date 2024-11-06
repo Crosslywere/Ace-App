@@ -44,74 +44,6 @@
 			</div>
 			<div class="container white-bg br-16 border flex-col fit-height" style="padding:0 53px 53px 53px;margin-top:40px">
 				<h2>Configuration Exam Export</h2>
-				<!-- <form th:action="@{/download}" th:object="${config}" method="post">
-					<input type="number" th:field="*{examId}" hidden>
-					<div class="flex-row align-center">
-						<input type="checkbox" th:field="*{serialNumber}" class="mr-8">
-						<label class="width-100">
-							SERIAL NUMBER
-							<br>
-							<input type="text" th:field="*{serialNumberStr}" class="br-16 border">
-						</label>
-					</div>
-					<br>
-					<label>
-						FIELD 1
-						<br>
-						<input type="text" name="field1Str" id="field1Str" th:value="${exam.loginField1Desc}" class="br-16 border">
-					</label>
-					<br>
-					<div class="flex-row" th:if="${exam.loginField2.ordinal != 0}">
-						<input type="checkbox" th:field="*{field2}" class="mr-8">
-						<label class="width-100">
-							FIELD 2
-							<br>
-							<input type="text" name="field2Str" id="field2Str" th:value="${exam.loginField2Desc}" class="br-16 border">
-						</label>
-					</div>
-					<br>
-					<div class="flex-row">
-						<input type="checkbox" th:field="*{timeUsed}" class="mr-8">
-						<label class="width-100">
-							TIME USED (IN SECONDS)
-							<br>
-							<input type="text" th:field="*{timeUsedStr}" class="br-16 border">	
-						</label>
-					</div>
-					<br>
-					<label>
-						REPRESENT QUESTION AS
-						<select th:field="*{questionAs}" class="border br-16">
-							<option value="-1">The Question Number Only</option>
-							<option value="0">The Question And The Number</option>
-							<option value="1">The Question Only</option>
-						</select>
-					</label>
-					<br>
-					<label>
-						REPRESENT ANSWER AS
-						<select th:field="*{answerAs}" class="border br-16">
-							<option value="-1">The Answer Index Only</option>
-							<option value="0">The Answer And The Index</option>
-							<option value="1">The Answer Only</option>
-						</select>
-					</label>
-					<label>
-						<input type="checkbox" th:field="*{allCandidates}">
-						EXPORT ALL CANDIDATES
-					</label>
-					<br>
-					<label>
-						<input type="checkbox" th:field="*{showScore}">
-						SHOW RESULTS
-					</label>
-					<br>
-					<br>
-					<div class="flex-row justify-end">
-						<button type="submit" class="action-btn br-16">Configure</button>
-					</div>
-				</form> -->
-				<!-- <form th:action="@{/export/download}" id="export" th:object="${configurer}" method="get">
 					<input type="number" th:field="*{examId}" hidden>
 					<label>
 						<input type="checkbox" th:field="*{exportAllCandidates}">
@@ -119,8 +51,74 @@
 					</label>
 					<input type="submit" value="Download" >
 				</form> -->
-				<form th:action="@{/download/{id}(id=${exam.examId})}" th:object="${configurer}" method="post">
-					<button type="submit">Proceed</button>
+				<form th:action="@{/export/{id}(id=${exam.examId})}" th:object="${configurer}" method="post">
+					<div class="width-100">
+						<input type="checkbox" th:field="*{field1}">
+						<label for="field1Str">FIELD 1</label>
+					</div>
+					<div class="width-100">
+						<input type="text" id="field1Str" th:field="*{field1Str}" class="br-16 border">
+					</div>
+					<div class="width-100">
+						<input type="checkbox" th:field="*{field2}">
+						<label for="field2Str">FIELD 2</label>
+					</div>
+					<div class="width-100">
+						<input type="text" id="field2Str" th:field="*{field2Str}" class="br-16 border">
+					</div>
+					<div class="width-100">
+						<input type="checkbox" id="names" th:field="*{names}">
+						<label for="names">NAMES</label>
+					</div>
+					<div class="width-100">
+						<label for="firstname" class="width-100">FIRSTNAME</label>
+						<input type="text" id="firstname" th:field="*{firstName}" class="br-16 border">
+					</div>
+					<div class="width-100">
+						<label for="lastname" class="width-100">LASTNAME</label>
+						<input type="text" id="lastname" th:field="*{lastName}" class="br-16 border">
+					</div>
+					<div class="width-100">
+						<label for="othernames" class="width-100">OTHERNAMES</label>
+						<input type="text" id="othernames" th:field="*{otherName}" class="br-16 border">
+					</div>
+					<div class="width-100">
+						<input type="checkbox" th:field="*{email}">
+						<label for="emailStr">EMAIL</label>
+					</div>
+					<div class="width-100">
+						<input type="text" id="emailStr" th:field="*{emailStr}" class="br-16 border">
+					</div>
+					 <div class="width-100">
+						<input type="checkbox" th:field="*{phone}">
+						<label for="phoneNumber">PHONE NUMBER</label>
+					 </div>
+					 <div class="width-100">
+						<input type="text" id="phoneNumber" th:field="*{phoneNumberStr}" class="br-16 border">
+					 </div>
+					 <div class="width-100">
+						<input type="checkbox" th:field="*{state}">
+						<label for="stateStr">STATE</label>
+					 </div>
+					 <div class="width-100">
+						<input type="text" id="stateStr" th:field="*{stateStr}" class="br-16 border">
+					 </div>
+					 <div class="width-100">
+						<input type="checkbox" th:field="*{timeUsed}">
+						<label for="timeUsedStr">TIME USED</label>
+					 </div>
+					 <div class="width-100">
+						<input type="text" id="timeUsedStr" th:field="*{timeUsedStr}" class="br-16 border">
+					 </div>
+					 <div class="width-100">
+						<input type="checkbox" id="paperScores" th:field="*{paperScores}">
+						<label for="paperScores">PAPER SCORES</label>
+					 </div>
+					<div class="width-100">
+						<input type="checkbox" id="allCandidates" th:field="*{exportAllCandidates}">
+						<label for="allCandidates">EXPORT ALL CANDIDATES</label>
+					 </div>
+					<button type="submit" class="action-btn br-16">Proceed</button>
 				</form>
 			</div>
 		</div>
