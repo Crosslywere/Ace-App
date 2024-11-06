@@ -63,11 +63,11 @@
 			th:formaction="@{/exam/{paperName}/1(paperName=${paper})}"
 			th:aria-current="${currentPaper == paper ? 'true' : ''}"
 			th:text="${paper}"
-			th:class="|exam-paper ${currentPaper == paper ? 'action-btn' : 'alt-action-btn'} br-16|"
+			th:class="|exam-paper ${currentPaper == paper ? 'action-btn' : 'alt-action-btn'} br-b-16|"
 			style="width:154px;height:46px;margin:0 4px;"
-			form="question-form">Paper</button>
+			form="question-form">PaperSelect</button>
 		</th:block>
-		<button form="question-form" class="exam-paper danger-btn br-16" type="submit" th:formaction="@{/exam/submit}">Submit</button>
+		<button form="question-form" class="exam-paper danger-btn br-b-16" type="submit" th:formaction="@{/exam/submit}">Submit</button>
 		<input form="question-form" type="number" th:field="${candidate.currentPaperQuestionNumber}" hidden>
 		<input form="question-form" type="number" th:field="${candidate.timeUsed}" hidden>
 		<input form="question-form" type="text" th:field="${candidate.currentPaperName}" hidden>
@@ -97,7 +97,8 @@
 		</div>
 	</form>
 	<script>
-		window.addEventListener("DOMContentLoaded", () => {
+		document.addEventListener("DOMContentLoaded", () => {
+			document.querySelector("form").scrollIntoView({behavior :"smooth", block :"center", inline :"start"})
 			// Count down timer
 			const timeUsed = document.getElementById("timeUsed");
 			const timeSlot = document.getElementById("timer");

@@ -54,13 +54,13 @@
 			<th:block th:text="${field2Desc}"></th:block>
 			<input th:type="${field2.type}" th:field="*{field2}" class="br-16 border width-100" style="margin: 8px 0 24px;" required>
 			<th:block th:if="${field2.name == 'Password'}">
-				<button id="password-toggle" class="action-btn" style="position:absolute;top:-4px;right:12px;padding:8px;border-radius:4px;">show</button>
+				<span id="password-toggle" class="action-btn" tabindex="-1" style="position:absolute;top:-4px;right:12px;padding:8px;border-radius:4px;">show</span>
 			</th:block>
 		</label>
 		<div th:if="${errorMessage ne null}">
 			<p th:text="|* ${errorMessage}|" class="danger-text text-center"></p>
 		</div>
-		<button type="submit" class="action-btn width-100 br-16">Login</button>
+		<button type="submit" id="submit-btn" class="action-btn width-100 br-16">Login</button>
 	</form>
 	<script>
 		showPasswordBtn = document.getElementById('password-toggle');
@@ -77,6 +77,11 @@
 				}
 			}
 		}
+		document.addEventListener("keypress", (ev) => {
+			if (ev.key == "Enter") {
+				document.getElementById("submit-btn").click();
+			}
+		})
 	</script>
 </body>
 </html>

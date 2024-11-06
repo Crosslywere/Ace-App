@@ -51,6 +51,10 @@ body {
 .br-16 {
 	border-radius: 1em;
 }
+.br-b-16 {
+	border-bottom-left-radius: 1em;
+	border-bottom-right-radius: 1em;
+}
 .border-left, .border {
 	border-left: thin solid #BDBDBD;
 }
