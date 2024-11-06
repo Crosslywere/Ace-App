@@ -36,22 +36,4 @@
 			</div>
 		</form>
 	</div>
-	<script>
-		document.onkeyup = (ev) => {
-			switch (ev.key) {
-				case 'ArrowLeft':
-				case 'ArrowUp':
-					document.getElementById('back-btn').click();
-					break;
-				case 'ArrowRight':
-				case 'ArrowDown':
-					document.querySelector('form').submit();
-					break;
-			}
-		}
-		document.getElementById("no-btn").onclick = (ev) => {
-			ev.preventDefault();
-			history.back();
-		}
-	</script>
 </html>
