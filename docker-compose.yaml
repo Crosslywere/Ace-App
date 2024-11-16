@@ -20,7 +20,7 @@ services:
     environment:
       #Enviroment variables to specify how to link to the database
       DB_NAME: postgresql #Specifies that the database is postgres
-      DB_URL: jdbc:postgresql://app_db:5432/ace_exam_platform #Should end with the same as POSTGRES_DB
+      DB_URL: postgresql://app_db:5432/ace_exam_platform #Should end with the same as POSTGRES_DB
       DB_USERNAME: ace #Should be the same as the POSTGRES_USER
       DB_PASSWORD: replace_password #Should be the same as the POSTGRES_PASSWORD
       DB_DDL: update #Should be either create, create-drop, update, validate. Set as update to update the database tables/schemas
